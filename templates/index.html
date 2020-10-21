@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Flask Demo</title>
+    <title>IHDB</title>
 
     <!-- Import the Plotly library. Note that this has to 
          happen before we importa any code that uses Plotly. -->
@@ -89,31 +89,31 @@
               <ul class="list-group" id="filters">
                 <li class="filter list-group-item">
                     <label for="year">Year</label>
-                    <select class="form-control" id="year"></select>
+                    <select class="form-control" id="yearform"></select>
                   </li>
                 <li class="filter list-group-item">
                   <label for="name">Hurricane Name</label>
-                  <select class="form-control" id="name"></select>
+                  <select class="form-control" id="nameform"></select>
                 </li>
                 <li class="filter list-group-item">
                   <label for="city">City Name</label>
-                  <select class="form-control" id="city"></select>
+                  <select class="form-control" id="cityform"></select>
                 </li>
                 <li class="filter list-group-item">
-                  <label for="state">State Name</label>
-                  <select class="form-control" id="state"></select>
+                  <label for="state">Country Name</label>
+                  <select class="form-control" id="countryform"></select>
                 </li>
                 <li class="filter list-group-item">
                   <label for="category">Category</label>
-                  <select class="form-control" id="category"></select>
+                  <select class="form-control" id="categoryform"></select>
                 </li>
                 <li class="filter list-group-item">
                     <label for="wind">Maximum Wind Speed</label>
-                    <select class="form-control" id="wind"></select>
+                    <select class="form-control" id="windform"></select>
                   </li>
               </ul>
             </div>
-            <button id="search-btn" type="button" class="btn btn-default">Search</button>
+            <button id="search-btn" type="button" class="btn btn-default">Update</button>
           </nav>
     
           <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
@@ -143,6 +143,22 @@
             <div id="globe">
                 <img src="..\static\images\globe.jpg" width="500" height="500">      
             </div>
+            <div id="table-area" class="">
+              <table id="hurricane-table" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class="table-head">Year</th>
+                    <th class="table-head">Name</th>
+                    <th class="table-head">City</th>
+                    <th class="table-head">Country</th>
+                    <th class="table-head">Category</th>
+                    <th class="table-head">Latitude</th>
+                    <th class="table-head">Longitude</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
       </div>
 
@@ -153,7 +169,8 @@
          Go to app.py to see how that '/other' route is defined. -->
     <a href="/other">Click here for the other page!</a>
 
-    <!-- Import the main JavaScript code. -->
+    <!-- Import the main JavaScript code. -->    
+    <script type="text/javascript" src="static/js/testdata.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
     <!-- ADDED -->

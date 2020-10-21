@@ -2,17 +2,20 @@
 from flask import Flask
 from flask import render_template 
 from flask import jsonify
+from flask import request
 
 # Import the functions we need from SQL Alchemy
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
+from sqlalchemy import and_, or_, text
 
 from config import username
 from config import password
 
 from datetime import datetime
+
 
 # Define the database connection parameters
 # username = 'postgres'  # Ideally this would come from config.py (or similar)
@@ -72,30 +75,145 @@ def HurricaneNames():
 
     return jsonify(all_hurricanes)
 
-@app.route("/hurricaneDictionary")
-def HurricaneDictionary():
+
+@app.route("/everything")
+def everything():
     ''' Query the database for population numbers and return the results as a JSON. '''
 
     # Open a session, run the query, and then close the session again
     session = Session(engine)
-    results = session.query(hurricane_table.name,hurricane_table.date_stamp,hurricane_table.status,hurricane_table.max_wind,hurricane_table.city,hurricane_table.country).all()
+    results = session.query(hurricane_table.name,
+                            hurricane_table.date_stamp,
+                            hurricane_table.time_stamp,
+                            hurricane_table.status,
+                            hurricane_table.max_wind,
+                            hurricane_table.city,
+                            hurricane_table.country,
+                            hurricane_table.new_latitude,
+                            hurricane_table.new_longitude).all()
     session.close 
 
     print("results: ", results)
 
     hurricaneDetails = []
-    for name, date_stamp, status, max_wind, city, country in results:
+    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
         dict = {}
         dict["name"] = name
         dict["status"] = status
         dict["date_stamp"] = date_stamp
+        dict["time_stamp"] = time_stamp
         dict["max_wind"] = max_wind
         dict["city"] = city
         dict["country"] = country
+        dict["latitude"] = new_latitude
+        dict["longitude"] = new_longitude
         hurricaneDetails.append(dict)
 
     # Return the jsonified result. 
     return jsonify(hurricaneDetails)
+
+
+
+@app.route("/searchByName")
+def searchByName():
+    ''' Query the database for population numbers and return the results as a JSON. '''
+
+    name  = request.args.get('name', None)
+
+    # Open a session, run the query, and then close the session again
+    session = Session(engine)
+    results = session.query(hurricane_table.name,
+                            hurricane_table.date_stamp,
+                            hurricane_table.time_stamp,
+                            hurricane_table.status,
+                            hurricane_table.max_wind,
+                            hurricane_table.city,
+                            hurricane_table.country,
+                            hurricane_table.new_latitude,
+                            hurricane_table.new_longitude)\
+                                .filter(hurricane_table.name == name).all()
+    session.close 
+
+    print("Search Results: ", results)
+
+    hurricaneDetails = []
+    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
+        dict = {}
+        dict["name"] = name
+        dict["status"] = status
+        dict["date_stamp"] = date_stamp
+        dict["time_stamp"] = time_stamp
+        dict["max_wind"] = max_wind
+        dict["city"] = city
+        dict["country"] = country
+        dict["latitude"] = new_latitude
+        dict["longitude"] = new_longitude
+        hurricaneDetails.append(dict)
+
+    # Return the jsonified result. 
+    return jsonify(hurricaneDetails)
+
+
+
+@app.route("/searchFor")
+def searchFor():
+    ''' Query the database for population numbers and return the results as a JSON. '''
+
+    year  = request.args.get('year', None)
+    name  = request.args.get('name', None)
+
+    conds = []
+    
+    if (year):
+        string = "hurricane_table.date_stamp/10000 == {}".format(year)
+        print(string)
+        conds.append(string)
+
+    if (name):
+        string = "hurricane_table.name == {}".format(name)
+        print(string)
+        conds.append(string)
+
+    print(conds)
+
+    # Open a session, run the query, and then close the session again
+    session = Session(engine)
+    results = session.query(hurricane_table.name,
+                            hurricane_table.date_stamp,
+                            hurricane_table.time_stamp,
+                            hurricane_table.status,
+                            hurricane_table.max_wind,
+                            hurricane_table.city,
+                            hurricane_table.country,
+                            hurricane_table.new_latitude,
+                            hurricane_table.new_longitude)\
+                                .filter(text(and_(*conds))).all()
+                                #.filter(hurricane_table.date_stamp/10000 == year)\
+                                #.filter(hurricane_table.name == name).all()
+                                
+                               
+    session.close 
+
+    print("Search Results: ", results)
+
+    hurricaneDetails = []
+    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
+        dict = {}
+        dict["name"] = name
+        dict["status"] = status
+        dict["date_stamp"] = date_stamp
+        dict["time_stamp"] = time_stamp
+        dict["max_wind"] = max_wind
+        dict["city"] = city
+        dict["country"] = country
+        dict["latitude"] = new_latitude
+        dict["longitude"] = new_longitude
+        hurricaneDetails.append(dict)
+
+    # Return the jsonified result. 
+    return jsonify(hurricaneDetails)
+
+
 
 @app.route("/test")
 def TestRoute():
