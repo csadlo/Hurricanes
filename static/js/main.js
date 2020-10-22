@@ -81,6 +81,7 @@ function handleChange(event) {
 
     d3.json(search_url).then(function (data) 
     {
+        console.log("Hello There!");
         hurricaneData = [];
         hurricaneData = data;
         console.log("Accessing URL:", search_url);
@@ -107,6 +108,7 @@ function handleChange(event) {
         }
     }
 
+    //updatePresentationWindow(filteredData);
     updateTable(filteredData);
 
     // Make note of the most recent selection
@@ -116,11 +118,108 @@ function handleChange(event) {
     UpdateYearDropDownMenu(filteredData);
     UpdateNameDropDownMenu(filteredData);
 
-  
+
     console.log("Exiting handleChange: Another Happy Landing!");
 
     return false;
 }
+
+/*
+function updatePresentationWindow(json_data)
+{
+    var mode = d3.select("#PresentationMode").property("value");
+
+    if      (mode == "globe")
+        globeMethod(json_data);
+
+    else if (mode == "leaflet")
+        leafletMethod(json_data);
+
+    else if (mode == "table")
+        updateTable(json_data);
+
+}
+
+function globeMethod(json_data)
+{
+    console.log("Entering globeMethod()...");
+
+    var displayArea = d3.select("#Data_Presentation_Window");
+    globePath = "..\\static\\images\\globe.jpg";
+
+    // Reset this div to empty
+    document.getElementById("Data_Presentation_Window").innerHTML = "";    
+
+    displayArea.append("img")
+       .attr("src", globePath)
+       .attr("width", "500")
+       .attr("height", "500");
+
+    console.log("Exiting globeMethod()..."); 
+
+}
+
+function leafletMethod(json_data)
+{
+    console.log("Entering leafletMethod()...");
+
+    document.getElementById("Data_Presentation_Window").innerHTML = "";    
+
+    hurricaneData = json_data;
+    console.log("data ", hurricaneData);
+
+    // var selectedYear = 2001;
+    // var selectedName = "MICHELLE";
+
+    // var filteredData = [];
+    // hurricaneData.forEach((row) =>
+    // {
+    //     if (Math.trunc(row.date_stamp/10000) == selectedYear
+    //         && row.name.trim().toUpperCase() == selectedName)
+    //     {
+    //         console.log("rowdata ", row);
+    //         filteredData.push(row);
+    //     }        
+    // });
+    
+
+    createMap(hurricaneData);
+
+    console.log("Exiting leafletMethod()..."); 
+}
+*/
+
+function createMap(hurricaneData)
+{
+    API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
+    
+    var myMap = L.map("Data_Presentation_Window", {
+        center: [30, -90],
+        zoom: 5
+    });       
+    
+    // Adding tile layer
+    L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+        attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+        tileSize: 512,
+        maxZoom: 18,
+        zoomOffset: -1,
+        id: "mapbox/streets-v11",
+        accessToken: API_KEY
+    }).addTo(myMap);
+    
+    for (var i = 0; i < hurricaneData.length; i++) {
+    
+        var lat = hurricaneData[i].latitude;
+        var lon = hurricaneData[i].longitude;
+
+        console.log("latitude ", lat);
+        console.log("longitude ", lon);
+
+        L.marker([lon, lat]).addTo(myMap);
+    }
+}
+// LEAFLET METHOD ENDS HERE
 
 
 function updateTable(thisTableData) {
@@ -138,16 +237,15 @@ function updateTable(thisTableData) {
   
     // Use d3 to append one table row `tr` for each UFO-sighting report object
     thisTableData.forEach(function(sightingReport) {
-      //console.log(sightingReport);
-      var row = tbody.append("tr");
-  
-      Object.entries(sightingReport).forEach(function([key, value]) {
-        //console.log(key, value);
-  
-        // Append a cell to the row for each value in the UFO-sighting report object
-        var cell = row.append("td");
-        cell.text(value);
-      });
+        //console.log(sightingReport);
+        var row = tbody.append("tr");
+
+        Object.entries(sightingReport).forEach(function([key, value]) {
+            //console.log(key, value);
+            // Append a cell to the row for each value in the UFO-sighting report object
+            var cell = row.append("td");
+            cell.text(value);
+        });
     });
 
     console.log("Exiting updateTable()");
@@ -297,6 +395,8 @@ function InitDashboard()
 
     InitializeYearDropDownMenu();
     InitializeNameDropDownMenu();
+
+    //handleChange();
 
     console.log("Exiting Init Dashboard");
 }

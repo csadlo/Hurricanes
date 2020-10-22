@@ -40,11 +40,11 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Dropdown Options
               </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="">Option1</a>
-                <a class="dropdown-item" href="">Option2</a>
-                <a class="dropdown-item" href="">Option3</a>
-                <a class="dropdown-item" href="">Option4</a>    
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="PresentationMode">
+                <a class="dropdown-item" onclick="globeMethod()" href="#">Globe</a>
+                <a class="dropdown-item" onclick="leafletMethod()" href="#">Leaflet</a>
+                <a class="dropdown-item" onclick="javalibMethod()" href="#">javaLib</a>
+                <a class="dropdown-item" onclick="dataMethod()"href="">Data</a>    
               </div>
             </li>
           </ul>
@@ -60,32 +60,6 @@
           <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="sidebar-sticky pt-3">
               <h4>Data</h4>
-<!--               <ul class="list-group" id="filters">
-                <li class="filter list-group-item">
-                    <label for="year">Year</label>
-                    <input class="form-control" id="year" type="text" placeholder="2005">
-                  </li>
-                <li class="filter list-group-item">
-                  <label for="name">Hurricane Name</label>
-                  <input class="form-control" id="name" type="text" placeholder="Katrina">
-                </li>
-                <li class="filter list-group-item">
-                  <label for="city">City Name</label>
-                  <input class="form-control" id="city" type="text" placeholder="New Orleans">
-                </li>
-                <li class="filter list-group-item">
-                  <label for="state">State Name</label>
-                  <input class="form-control" id="state" type="text" placeholder="Louisiana">
-                </li>
-                <li class="filter list-group-item">
-                  <label for="category">Category</label>
-                  <input class="form-control" id="category" type="text" placeholder="5">
-                </li>
-                <li class="filter list-group-item">
-                    <label for="wind">Maximum Wind Speed</label>
-                    <input class="form-control" id="wind" type="text" placeholder="US">
-                  </li>
-              </ul> -->
               <ul class="list-group" id="filters">
                 <li class="filter list-group-item">
                     <label for="year">Year</label>
@@ -140,8 +114,8 @@
             </p>    
             <!-- ADDED -->
             <!-- Placeholder for the globe -->
-            <div id="globe">
-                <img src="..\static\images\globe.jpg" width="500" height="500">      
+            <div id="Data_Presentation_Window">
+                <!--<img src="..\static\images\globe.jpg" width="500" height="500">  -->    
             </div>
             <div id="table-area" class="">
               <table id="hurricane-table" class="table table-striped">
@@ -177,6 +151,14 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- ADDED for LEAFLET-->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+    <!-- D3 JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+    <!---------------------->
 
 </body>
 
