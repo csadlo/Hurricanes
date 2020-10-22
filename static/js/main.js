@@ -158,10 +158,20 @@ function UpdateYearDropDownMenu(data)
     //d3.json("/yearData").then(function(data) 
     {
         // selects the dropdown entity in the html
-        var selector = d3.select("#yearform");
+        var selector = yearInputElement;
         console.log("UpdateYearDropDownMenu: year data ", data)
 
-        selector.selectAll("option").remove();
+        // Save the selected value, if any
+        var yearform_value = yearInputElement.property("value");
+
+        yearInputElement.selectAll("option").remove();
+
+        // Put the selected value at the top of the list
+        if (yearform_value && IsSpecificValue(yearform_value)) {
+            selector.append("option")
+            .text(yearform_value)
+            .property("value", yearform_value);
+        }
 
         selector.append("option")
         .text("All Years")
@@ -193,12 +203,20 @@ function UpdateNameDropDownMenu(data)
     //d3.json("/nameData").then(function(data) 
     {
         // selects the dropdown entity in the html
-        var selector = d3.select("#nameform");
+        var selector = nameInputElement;
         console.log("UpdateNameDropDownMenu: name data ", data)
 
-        //selector.
+        // Save the selected value, if any
+        var nameform_value = nameInputElement.property("value");
 
         selector.selectAll("option").remove();
+
+        // Put the selected value at the top of the list
+        if (nameform_value && IsSpecificValue(nameform_value)) {
+            selector.append("option")
+            .text(nameform_value)
+            .property("value", nameform_value);
+        }
 
         selector.append("option")
         .text("All Names")
