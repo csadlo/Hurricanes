@@ -45,7 +45,7 @@ function handleChange(event) {
     // Prevent the page from refreshing
     //d3.event.preventDefault();
 
-    var returnedData = [];
+    var filteredData = [];
 
     // Scan all of the current selections in the search bar
     var yearform_value = yearInputElement.property("value");
@@ -81,17 +81,21 @@ function handleChange(event) {
 
     d3.json(search_url).then(function (data) 
     {
-        console.log("Hello There!");
-        hurricaneData = [];
-        hurricaneData = data;
+        filteredData = [];
+        filteredData = data;
         console.log("Accessing URL:", search_url);
-        console.log("Database Returns: ", hurricaneData);
-        
-        // Use this statement to start using the database
-        //filteredData = hurricaneData;
-        returnedData = hurricaneData;
+        console.log("Database Returns: ", filteredData);
+
+        UpdatePresentationWindow(filteredData);
+
+        // Dynamically Update all of the OTHER drop down menus, while maintaining an "ALL" option
+        UpdateYearDropDownMenu(filteredData);
+        UpdateNameDropDownMenu(filteredData);
+
     });
 
+    /*
+    // USE THIS TO USE THE FAKE DATA
     // Use the client-side data until the above proves to work 
     var filteredData = testdata;
     {
@@ -107,27 +111,41 @@ function handleChange(event) {
             filteredData = filteredData.filter(sightingReport => sightingReport.name.toLowerCase() === nameform_value.toLowerCase());
         }
     }
-
-    //updatePresentationWindow(filteredData);
-    updateTable(filteredData);
-
-    // Make note of the most recent selection
-    // Check a global variable here...
-
-    // Dynamically Update all of the OTHER drop down menus, while maintaining an "ALL" option
-    UpdateYearDropDownMenu(filteredData);
-    UpdateNameDropDownMenu(filteredData);
-
+    */
+    
 
     console.log("Exiting handleChange: Another Happy Landing!");
 
     return false;
 }
 
-/*
-function updatePresentationWindow(json_data)
+function handleModeChange()
 {
-    var mode = d3.select("#PresentationMode").property("value");
+    //var mode = d3.select("#PresentationMode").property("value");
+    //var mode = d3.select("#PresentationMode").node().value; 
+    var mode = d3.select("#PresentationMode").value; 
+
+    $('.dropdown-menu li > a').click(function(e){
+        $('.current_mode').text(this.innerHTML);
+    });
+
+    console.log("HMC: The mode selected seems to be ...", mode);
+
+    // Try Saving the original results of this function so we don't have to query
+    // the database everytime we change a presentation mode.
+    handleChange();
+
+}
+
+
+function UpdatePresentationWindow(json_data)
+{
+    //var mode = d3.select("#PresentationMode").property("value");
+    var mode = d3.select("#PresentationMode").value; 
+
+    console.log("UPW: The mode selected seems to be ...", mode);
+
+    var mode = "table"
 
     if      (mode == "globe")
         globeMethod(json_data);
@@ -136,19 +154,51 @@ function updatePresentationWindow(json_data)
         leafletMethod(json_data);
 
     else if (mode == "table")
-        updateTable(json_data);
+        UpdateTable(json_data);
 
+}
+
+function homeMethod(json_data)
+{
+    console.log("Entering homeMethod()...");
+
+    var globePath = "..\\static\\images\\globe.jpg";
+    var summaryArea = d3.select("#Data_Presentation_Summary");
+    var displayArea = d3.select("#Data_Presentation_Window");
+
+    // Reset the summary and display divs to empty
+    summaryArea.html("");
+    displayArea.html("");
+    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
+    
+    //Add the summary
+    summaryArea.insert("h2").text("Home - Welcome to the International Hurricane Database");
+    summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Above list under the dropdown menu you can select the type of data presentation you are interest in.");
+    summaryArea.insert("p").text("Spirits gally coxswain bilge rat black jack salmagundi Brethren of the Coast cutlass hang the jib hornswaggle. Swab Sea Legs mizzen chandler bowsprit fathom bucko lass interloper crack Jennys tea cup. Bilged on her anchor gangplank Plate Fleet fore splice the main brace barque salmagundi draught nipperkin warp.");
+    summaryArea.insert("p").text("Reef Blimey chandler killick nipperkin black jack sloop haul wind swing the lead bring a spring upon her cable. Case shot American Main spirits Jolly Roger crack Jennys tea cup Sink me chantey stern execution dock piracy. Hempen halter mutiny Brethren of the Coast trysail clap of thunder parrel hang the jib draught poop deck Privateer.");
+
+    displayArea.append("img")
+       .attr("src", globePath)
+       .attr("width", "500")
+       .attr("height", "500");
+
+    console.log("Exiting homeMethod()...");
 }
 
 function globeMethod(json_data)
 {
     console.log("Entering globeMethod()...");
 
+    var globePath = "..\\static\\images\\globe.jpg";
+    var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
-    globePath = "..\\static\\images\\globe.jpg";
 
-    // Reset this div to empty
-    document.getElementById("Data_Presentation_Window").innerHTML = "";    
+    // Reset the summary and display divs to empty
+    summaryArea.html("");
+    displayArea.html("");
+
+    summaryArea.insert("h2").text("Global View");
+    summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
 
     displayArea.append("img")
        .attr("src", globePath)
@@ -156,7 +206,6 @@ function globeMethod(json_data)
        .attr("height", "500");
 
     console.log("Exiting globeMethod()..."); 
-
 }
 
 function leafletMethod(json_data)
@@ -187,7 +236,7 @@ function leafletMethod(json_data)
 
     console.log("Exiting leafletMethod()..."); 
 }
-*/
+
 
 function createMap(hurricaneData)
 {
@@ -221,20 +270,93 @@ function createMap(hurricaneData)
 }
 // LEAFLET METHOD ENDS HERE
 
+function tableMethod() {
 
-function updateTable(thisTableData) {
 
-    console.log("Entering updateTable()");
-  
-    // Start from scratch
-    d3.select("tbody").selectAll("tr").remove();
-  
-    // Get a reference to the table body
-    var tbody = d3.select("tbody");
-  
+}
+
+function UpdateTable(thisTableData) {
+
+    console.log("Entering UpdateTable()");
+
     // Console.log the weather data from data.js
     console.log(thisTableData);
   
+    var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
+    var col_order = ["datestamp", "timestamp", "name", "city", "country", "max_wind", "latitude", "longitude"];
+
+    var summaryArea = d3.select("#Data_Presentation_Summary");
+    var displayArea = d3.select("#Data_Presentation_Window");
+
+    // Reset the summary and display divs to empty
+    summaryArea.html("");
+    displayArea.html("");
+    //d3.select("tbody").selectAll("tr").remove();
+    
+    var table = displayArea.append("table")
+    table.attr("class", "table table-striped");
+    var thead = table.append("thead");
+    var tbody = table.append("tbody");
+
+
+    thead.append("tr");
+
+    d3.select("tr")
+        .selectAll("th")
+        .data(col_names)
+        .enter()
+        .append("th")
+        .attr("class", "table-head")
+        .text(function(d) { return d });
+
+    var tr = d3.select("tbody").selectAll("tr")
+        .data(thisTableData)
+        .enter()
+        .append("tr");
+
+    var td = tr.selectAll("td")
+        .data(function(d) {
+            return col_order.map(function(m) { return d[m]; });
+        })
+        .enter()
+        .append("td")
+        .text(function(d) {return d});
+
+
+/*
+    var data = [
+        { 'sex': 'male', 'risk': '0.04', 'age_group': 'old' },
+        { 'sex': 'female', 'risk': '0.03', 'age_group': 'young' },
+        { 'sex': 'male', 'risk': '0.12', 'age_group': 'old' },
+        { 'sex': 'female', 'risk': '0.04', 'age_group': 'old' },
+        ];
+        
+    var metadata = ['sex', 'risk', 'risk', 'age_group'];
+    
+    var table = d3.select("body").append("table");
+        table.append("thead");
+        table.append("tbody");
+    
+    var thead = d3.select("thead")
+        .selectAll("th")
+        .data(col_order)
+        .enter()
+        .append("th")
+        .text(function(d) { return d });
+    var tr = d3.select("tbody").selectAll("tr")
+        .data(thisTableData)
+        .enter()
+        .append("tr");
+    var td = tr.selectAll("td")
+        .data(function(d) {
+            return col_order.map(function(m) { return d[m]; });
+        })
+        .enter()
+        .append("td")
+        .text(function(d) {return d});
+        */
+
+    /*
     // Use d3 to append one table row `tr` for each UFO-sighting report object
     thisTableData.forEach(function(sightingReport) {
         //console.log(sightingReport);
@@ -247,8 +369,9 @@ function updateTable(thisTableData) {
             cell.text(value);
         });
     });
+    */
 
-    console.log("Exiting updateTable()");
+    console.log("Exiting UpdateTable()");
 }
 
 function UpdateYearDropDownMenu(data)
@@ -283,6 +406,10 @@ function UpdateYearDropDownMenu(data)
             if (!uniqueYears.includes(year))
                 uniqueYears.push(year);
         });
+
+        // Sort the unique years
+        uniqueYears.sort();
+        uniqueYears.reverse();
 
         console.log("Unique Years are: ", uniqueYears);
 
@@ -329,6 +456,9 @@ function UpdateNameDropDownMenu(data)
         });
 
         console.log("Unique Names are: ", uniqueNames);
+
+        // Sort the unique names
+        uniqueNames.sort();
 
         // fills the dropdown with list of values for selection
         uniqueNames.forEach((name) =>

@@ -24,7 +24,7 @@
 <body>
     
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#"><h1>Hurricanes</h1></a>
+        <a class="navbar-brand" href="#"><h1>IHDB</h1></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -37,14 +37,16 @@
           </ul>
             <ul class="navbar-nav">
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <a class="nav-link dropdown-toggle current_mode" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Dropdown Options
               </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="PresentationMode">
-                <a class="dropdown-item" onclick="globeMethod()" href="#">Globe</a>
-                <a class="dropdown-item" onclick="leafletMethod()" href="#">Leaflet</a>
-                <a class="dropdown-item" onclick="javalibMethod()" href="#">javaLib</a>
-                <a class="dropdown-item" onclick="dataMethod()"href="">Data</a>    
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
+                <a class="dropdown-item option" onclick="homeMethod()" href="#" value="Home">Home</a>
+                <a class="dropdown-item option" onclick="handleModeChange()" href="#" value="Globe">Globe</a>
+                <a class="dropdown-item option" onclick="handleModeChange()" href="#">Leaflet</a>
+                <a class="dropdown-item option active" onclick="handleModeChange()" href="#" value="Table">Table</a>
+                <a class="dropdown-item option disabled" onclick="handleModeChange()" href="#">javaLib</a>
+                <a class="dropdown-item option disabled" onclick="handleModeChange()"href="">Data</a>    
               </div>
             </li>
           </ul>
@@ -102,19 +104,12 @@
     
               </div>
             </div>
-      
-            <h2>
-              Arrrrrrr
-            </h2>
-            <p>
-                Spirits gally coxswain bilge rat black jack salmagundi Brethren of the Coast cutlass hang the jib hornswaggle. Swab Sea Legs mizzen chandler bowsprit fathom bucko lass interloper crack Jennys tea cup. Bilged on her anchor gangplank Plate Fleet fore splice the main brace barque salmagundi draught nipperkin warp.
-            </p>    
-            <p>
-                Reef Blimey chandler killick nipperkin black jack sloop haul wind swing the lead bring a spring upon her cable. Case shot American Main spirits Jolly Roger crack Jennys tea cup Sink me chantey stern execution dock piracy. Hempen halter mutiny Brethren of the Coast trysail clap of thunder parrel hang the jib draught poop deck Privateer.
-            </p>    
+            <div id="Data_Presentation_Summary" class="">
+                <!-- Placeholder for the summary text of each presentation mode -->
+            </div>  
             <!-- ADDED -->
             <!-- Placeholder for the globe -->
-            <div id="Data_Presentation_Window">
+            <div id="Data_Presentation_Window" class="">
                 <!--<img src="..\static\images\globe.jpg" width="500" height="500">  -->    
             </div>
             <div id="table-area" class="">
@@ -153,11 +148,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!-- ADDED for LEAFLET-->
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-    crossorigin=""></script>
+    <!-- <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script> -->
     <!-- D3 JavaScript -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script> -->
     <!---------------------->
 
 </body>
