@@ -41,12 +41,12 @@
                 Dropdown Options
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
-                <a class="dropdown-item option" onclick="homeMethod()" href="#" value="Home">Home</a>
-                <a class="dropdown-item option" onclick="handleModeChange()" href="#" value="Globe">Globe</a>
-                <a class="dropdown-item option" onclick="handleModeChange()" href="#">Leaflet</a>
-                <a class="dropdown-item option active" onclick="handleModeChange()" href="#" value="Table">Table</a>
-                <a class="dropdown-item option disabled" onclick="handleModeChange()" href="#">javaLib</a>
-                <a class="dropdown-item option disabled" onclick="handleModeChange()"href="">Data</a>    
+                <a class="dropdown-item option" onclick="handleModeChange('home')" href="#">Home</a>
+                <a class="dropdown-item option" onclick="handleModeChange('globe')" href="#">Globe</a>
+                <a class="dropdown-item option" onclick="handleModeChange('leaflet')" href="#">Leaflet</a>
+                <a class="dropdown-item option active" onclick="handleModeChange('table')" href="#">Table</a>
+                <a class="dropdown-item option disabled" onclick="handleModeChange('FIXME')" href="#">javaLib</a>
+                <a class="dropdown-item option disabled" onclick="handleModeChange('FIXME')"href="">Data</a>    
               </div>
             </li>
           </ul>
@@ -59,7 +59,7 @@
     
       <div class="container-fluid">
         <div class="row">
-          <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+          <nav id="sidebarMenu" class="col-md-3 col-lg-3 d-md-block bg-light sidebar collapse">
             <div class="sidebar-sticky pt-3">
               <h4>Data</h4>
               <ul class="list-group" id="filters">
@@ -92,9 +92,9 @@
             <button id="search-btn" type="button" class="btn btn-default">Update</button>
           </nav>
     
-          <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+          <main role="main" class="col-md-9 ml-sm-auto col-lg-9 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-              <h1 class="h2" id="hurricaneName">[Hurricane Name]</h1>
+              <h1 class="h2" id="displayTitle">[Display Title]</h1>
               <div class="btn-toolbar mb-2 mb-md-0">
                 <div class="btn-group mr-2">
                   <button type="button" class="btn btn-sm btn-outline-secondary">Download</button>
@@ -111,22 +111,6 @@
             <!-- Placeholder for the globe -->
             <div id="Data_Presentation_Window" class="">
                 <!--<img src="..\static\images\globe.jpg" width="500" height="500">  -->    
-            </div>
-            <div id="table-area" class="">
-              <table id="hurricane-table" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th class="table-head">Year</th>
-                    <th class="table-head">Name</th>
-                    <th class="table-head">City</th>
-                    <th class="table-head">Country</th>
-                    <th class="table-head">Category</th>
-                    <th class="table-head">Latitude</th>
-                    <th class="table-head">Longitude</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
             </div>
         </div>
       </div>

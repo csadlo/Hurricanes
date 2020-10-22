@@ -1,6 +1,9 @@
 // Show that we've loaded the JavaScript file
 console.log("Loaded main.js");
 
+// The current presentation mode saved as a global variable
+var current_mode = 'home';
+
 // Select the input elements
 var yearInputElement = d3.select("#yearform");
 var nameInputElement = d3.select("#nameform");
@@ -12,15 +15,15 @@ var windInputElement = d3.select("#windform");
 // Select the button
 var search_button = d3.select("#search-btn");
 
-search_button.on("click",handleChange);
+search_button.on("click", handleFilterChange);
 
 // Uncomment this if you want the website to refresh when clicking off of a filter form
-yearInputElement.on("change", handleChange);
-nameInputElement.on("change", handleChange);
-cityInputElement.on("change", handleChange);
-countryInputElement.on("change", handleChange);
-categoryInputElement.on("change", handleChange);
-windInputElement.on("change", handleChange);
+yearInputElement.on("change", handleFilterChange);
+nameInputElement.on("change", handleFilterChange);
+cityInputElement.on("change", handleFilterChange);
+countryInputElement.on("change", handleFilterChange);
+categoryInputElement.on("change", handleFilterChange);
+windInputElement.on("change", handleFilterChange);
 
 // Create event handlers 
 //search_button.on("click", runEnter);
@@ -37,10 +40,30 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-// Function to handle changes to the search criteria
-function handleChange(event) {
 
-    console.log("Entering handleChange: Flying is for droids.");
+// NOTE: UPDATE THIS FOR FILTER BAR CHANGES
+function GetFilterBarInputValues()
+{
+    console.log("Entering GetFilterBarInputValues()");
+
+    dict = {};
+    dict["year"]        = yearInputElement.property("value");
+    dict["name"]        = nameInputElement.property("value");
+    dict["city"]        = cityInputElement.property("value");
+    dict["country"]     = countryInputElement.property("value");
+    dict["ccategory"]   = categoryInputElement.property("value");
+    dict["wind"]        = windInputElement.property("value");
+
+    console.log("Exiting GetFilterBarInputValues()");
+
+    return dict;
+}
+
+// Function to handle changes to the search criteria
+// NOTE: UPDATE THIS FOR FILTER BAR CHANGES
+function handleFilterChange(event) {
+
+    console.log("Entering handleFilterChange(): Flying is for droids.");
 
     // Prevent the page from refreshing
     //d3.event.preventDefault();
@@ -48,8 +71,14 @@ function handleChange(event) {
     var filteredData = [];
 
     // Scan all of the current selections in the search bar
-    var yearform_value = yearInputElement.property("value");
-    var nameform_value = nameInputElement.property("value");
+    //var yearform_value = yearInputElement.property("value");
+    //var nameform_value = nameInputElement.property("value");
+
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    yearform_value = inputs["year"];  // could be "ALL" or could be a specific value
+    nameform_value = inputs["name"];  // could be "ALL" or could be a specific value
 
 
     // Access the database and grab the data matching the requirements
@@ -79,10 +108,10 @@ function handleChange(event) {
 
     console.log("Search_URL = ", search_url);
 
-    d3.json(search_url).then(function (data) 
+    d3.json(search_url).then(function (json_data) 
     {
         filteredData = [];
-        filteredData = data;
+        filteredData = json_data;
         console.log("Accessing URL:", search_url);
         console.log("Database Returns: ", filteredData);
 
@@ -114,38 +143,78 @@ function handleChange(event) {
     */
     
 
-    console.log("Exiting handleChange: Another Happy Landing!");
+    console.log("Exiting handleFilterChange(): Another Happy Landing!");
 
     return false;
 }
 
-function handleModeChange()
+// This function updates the website when the data presentation mode has changed
+function handleModeChange(new_mode)
 {
-    //var mode = d3.select("#PresentationMode").property("value");
-    //var mode = d3.select("#PresentationMode").node().value; 
-    var mode = d3.select("#PresentationMode").value; 
+    console.log("Entering handleModeChange()");
 
+    //var prop_value = d3.select("#PresentationMode").property("value");    // returns NULL
+    //var node = d3.select("#PresentationMode").node();                       // returns NULL
+    //var node_value = d3.select("#PresentationMode").node().value;         // returns NULL
+    //var value = d3.select("#PresentationMode").value;
+    //var text = d3.select("#PresentationMode").text;
+
+    //console.log("handleModeChange(): #PresentationMode .property(value) is...", prop_value);
+    //console.log("handleModeChange(): #PresentationMode .node() is...", node);
+    //console.log("handleModeChange(): #PresentationMode .node().value is...", node_value);
+    //console.log("handleModeChange(): #PresentationMode .value is...", value);
+    //console.log("handleModeChange(): #PresentationMode .text is...", text);
+/*
+    //var store = $(this).html();
+    text = $('#navbarDropdown').text();
+    //value = $('#navbarDropdown').value;
+
+    console.log("handleModeChange(): #navbarDropdown .text = ", text);
+    //console.log("handleModeChange(): #navbarDropdown .value = ", value);
+*/
+    // Jquery Code
+    // FIXME
+    /*
     $('.dropdown-menu li > a').click(function(e){
         $('.current_mode').text(this.innerHTML);
     });
+    */
 
-    console.log("HMC: The mode selected seems to be ...", mode);
+    // current_mode is a global variable that can be accessed in other functions
+    //console.log("handleModeChange(): The current mode selected seems to be ...", current_mode);
+    current_mode = new_mode;
+    //console.log("handleModeChange(): The new mode selected seems to be ...", new_mode);
 
-    // Try Saving the original results of this function so we don't have to query
-    // the database everytime we change a presentation mode.
-    handleChange();
+    // Update the Bootstrap Dropdown Menu Text
+    if (current_mode == "home")
+        $('#navbarDropdown').text("Dropdown Options - Home");
+    else if (current_mode == "globe")
+        $('#navbarDropdown').text("Dropdown Options - Globe");
+    else if (current_mode == "leaflet")
+        $('#navbarDropdown').text("Dropdown Options - Leaflet");
+    else if (current_mode == "table")
+        $('#navbarDropdown').text("Dropdown Options - Table");
+    else if (current_mode == "FIXME")
+        $('#navbarDropdown').text("Dropdown Options - FIXME");
+    else
+        $('#navbarDropdown').text("Dropdown Options - FIXME");
+
+    // FIXME - Try caching the previous results of this function globally so we 
+    // don't have to query the database everytime we change a presentation mode.
+    handleFilterChange();
+
+    console.log("Exiting handleModeChange()");
 
 }
 
 
 function UpdatePresentationWindow(json_data)
 {
+    console.log("Entering UpdatePresentationWindow()");
+
     //var mode = d3.select("#PresentationMode").property("value");
-    var mode = d3.select("#PresentationMode").value; 
-
-    console.log("UPW: The mode selected seems to be ...", mode);
-
-    var mode = "table"
+    //var mode = d3.select("#PresentationMode").value; 
+    var mode = current_mode;    // Global variable
 
     if      (mode == "globe")
         globeMethod(json_data);
@@ -156,6 +225,7 @@ function UpdatePresentationWindow(json_data)
     else if (mode == "table")
         UpdateTable(json_data);
 
+    console.log("Exiting UpdatePresentationWindow()");
 }
 
 function homeMethod(json_data)
@@ -215,7 +285,7 @@ function leafletMethod(json_data)
     document.getElementById("Data_Presentation_Window").innerHTML = "";    
 
     hurricaneData = json_data;
-    console.log("data ", hurricaneData);
+    console.log("leafletMethod(): data ", hurricaneData);
 
     // var selectedYear = 2001;
     // var selectedName = "MICHELLE";
@@ -270,17 +340,14 @@ function createMap(hurricaneData)
 }
 // LEAFLET METHOD ENDS HERE
 
-function tableMethod() {
 
 
-}
-
-function UpdateTable(thisTableData) {
+function UpdateTable(json_data) {
 
     console.log("Entering UpdateTable()");
 
     // Console.log the weather data from data.js
-    console.log(thisTableData);
+    console.log("UpdateTable(): table data", json_data);
   
     var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
     var col_order = ["datestamp", "timestamp", "name", "city", "country", "max_wind", "latitude", "longitude"];
@@ -298,7 +365,6 @@ function UpdateTable(thisTableData) {
     var thead = table.append("thead");
     var tbody = table.append("tbody");
 
-
     thead.append("tr");
 
     d3.select("tr")
@@ -310,7 +376,7 @@ function UpdateTable(thisTableData) {
         .text(function(d) { return d });
 
     var tr = d3.select("tbody").selectAll("tr")
-        .data(thisTableData)
+        .data(json_data)
         .enter()
         .append("tr");
 
@@ -321,40 +387,6 @@ function UpdateTable(thisTableData) {
         .enter()
         .append("td")
         .text(function(d) {return d});
-
-
-/*
-    var data = [
-        { 'sex': 'male', 'risk': '0.04', 'age_group': 'old' },
-        { 'sex': 'female', 'risk': '0.03', 'age_group': 'young' },
-        { 'sex': 'male', 'risk': '0.12', 'age_group': 'old' },
-        { 'sex': 'female', 'risk': '0.04', 'age_group': 'old' },
-        ];
-        
-    var metadata = ['sex', 'risk', 'risk', 'age_group'];
-    
-    var table = d3.select("body").append("table");
-        table.append("thead");
-        table.append("tbody");
-    
-    var thead = d3.select("thead")
-        .selectAll("th")
-        .data(col_order)
-        .enter()
-        .append("th")
-        .text(function(d) { return d });
-    var tr = d3.select("tbody").selectAll("tr")
-        .data(thisTableData)
-        .enter()
-        .append("tr");
-    var td = tr.selectAll("td")
-        .data(function(d) {
-            return col_order.map(function(m) { return d[m]; });
-        })
-        .enter()
-        .append("td")
-        .text(function(d) {return d});
-        */
 
     /*
     // Use d3 to append one table row `tr` for each UFO-sighting report object
@@ -374,13 +406,13 @@ function UpdateTable(thisTableData) {
     console.log("Exiting UpdateTable()");
 }
 
-function UpdateYearDropDownMenu(data)
+function UpdateYearDropDownMenu(json_data)
 {
-    //d3.json("/yearData").then(function(data) 
+    //d3.json("/yearData").then(function(json_data) 
     {
         // selects the dropdown entity in the html
         var selector = yearInputElement;
-        console.log("UpdateYearDropDownMenu: year data ", data)
+        console.log("UpdateYearDropDownMenu(): year data ", json_data)
 
         // Save the selected value, if any
         var yearform_value = yearInputElement.property("value");
@@ -400,7 +432,7 @@ function UpdateYearDropDownMenu(data)
 
         // filter out non-unique years
         var uniqueYears = []
-        data.forEach((record) =>
+        json_data.forEach((record) =>
         {
             var year = Math.floor(record.date_stamp/10000);
             if (!uniqueYears.includes(year))
@@ -423,13 +455,13 @@ function UpdateYearDropDownMenu(data)
     }//);
 }
 
-function UpdateNameDropDownMenu(data)
+function UpdateNameDropDownMenu(json_data)
 {
-    //d3.json("/nameData").then(function(data) 
+    //d3.json("/nameData").then(function(json_data) 
     {
         // selects the dropdown entity in the html
         var selector = nameInputElement;
-        console.log("UpdateNameDropDownMenu: name data ", data)
+        console.log("UpdateNameDropDownMenu: name data ", json_data)
 
         // Save the selected value, if any
         var nameform_value = nameInputElement.property("value");
@@ -449,7 +481,7 @@ function UpdateNameDropDownMenu(data)
 
         // filter out non-unique names
         var uniqueNames = []
-        data.forEach((record) =>
+        json_data.forEach((record) =>
         {
             if (!uniqueNames.includes(record.name))
                 uniqueNames.push(record.name);
@@ -516,17 +548,18 @@ function InitializeNameDropDownMenu()
     }); 
 }
 
-// this function displays the dashboard in the landing page by using the first ID in dropdown as default
+// NOTE: UPDATE THIS FOR FILTER BAR CHANGES
+// This function displays the dashboard in the landing page by using the first ID in dropdown as default
 function InitDashboard()
 {
-    console.log("Entering InitDashboard");
+    console.log("Entering InitDashboard()");
 
     // Check what values are listed in the search window
 
     InitializeYearDropDownMenu();
     InitializeNameDropDownMenu();
 
-    //handleChange();
+    //handleFilterChange();
 
-    console.log("Exiting Init Dashboard");
+    console.log("Exiting Init Dashboard()");
 }
