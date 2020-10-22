@@ -4,6 +4,9 @@ console.log("Loaded main.js");
 // The current presentation mode saved as a global variable
 var current_mode = 'home';
 
+// The current set of hurricane json data retrieved from the server
+var current_data = [];
+
 // Select the input elements
 var yearInputElement = d3.select("#yearform");
 var nameInputElement = d3.select("#nameform");
@@ -70,18 +73,12 @@ function handleFilterChange(event) {
 
     var filteredData = [];
 
-    // Scan all of the current selections in the search bar
-    //var yearform_value = yearInputElement.property("value");
-    //var nameform_value = nameInputElement.property("value");
-
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
 
     yearform_value = inputs["year"];  // could be "ALL" or could be a specific value
     nameform_value = inputs["name"];  // could be "ALL" or could be a specific value
 
-
-    // Access the database and grab the data matching the requirements
     // Assemble the search URL to match the search bar filters selected
     var search_url = "/searchFor?";
     var num_params = 0;
@@ -106,42 +103,25 @@ function handleFilterChange(event) {
         num_params++;
     }
 
-    console.log("Search_URL = ", search_url);
+    console.log("Constructing Search URL = ", search_url);
 
+    // Access the database and grab the data matching the requirements
     d3.json(search_url).then(function (json_data) 
     {
-        filteredData = [];
-        filteredData = json_data;
-        console.log("Accessing URL:", search_url);
-        console.log("Database Returns: ", filteredData);
+        // Cache the filtered json data so that we can skip running 
+        // handleFilterChange() during a handleModeChange() event
+        current_data = json_data;
 
-        UpdatePresentationWindow(filteredData);
+        console.log("Accessing URL:", search_url);
+        console.log("Database Returns: ", current_data);
+
+        UpdatePresentationWindow(current_data);
 
         // Dynamically Update all of the OTHER drop down menus, while maintaining an "ALL" option
-        UpdateYearDropDownMenu(filteredData);
-        UpdateNameDropDownMenu(filteredData);
+        UpdateYearDropDownMenu(current_data);
+        UpdateNameDropDownMenu(current_data);
 
     });
-
-    /*
-    // USE THIS TO USE THE FAKE DATA
-    // Use the client-side data until the above proves to work 
-    var filteredData = testdata;
-    {
-        if (yearform_value && IsSpecificValue(yearform_value)) {
-            //console.log("Entering yearform check with: ", yearform_value);
-            // FIXME - Grabbing the year this was is a little bit hacky
-            filteredData = filteredData.filter(sightingReport => Math.floor(sightingReport.date_stamp/10000) == yearform_value);
-        }
-
-        var nameform_value = nameInputElement.property("value");
-        if (nameform_value && IsSpecificValue(nameform_value)) {
-            //console.log("Entering nameform check with: ", nameform_value);
-            filteredData = filteredData.filter(sightingReport => sightingReport.name.toLowerCase() === nameform_value.toLowerCase());
-        }
-    }
-    */
-    
 
     console.log("Exiting handleFilterChange(): Another Happy Landing!");
 
@@ -152,6 +132,8 @@ function handleFilterChange(event) {
 function handleModeChange(new_mode)
 {
     console.log("Entering handleModeChange()");
+
+    // ASK A TA - How do I get the current selection of the dropdown menu?
 
     //var prop_value = d3.select("#PresentationMode").property("value");    // returns NULL
     //var node = d3.select("#PresentationMode").node();                       // returns NULL
@@ -181,9 +163,9 @@ function handleModeChange(new_mode)
     */
 
     // current_mode is a global variable that can be accessed in other functions
-    //console.log("handleModeChange(): The current mode selected seems to be ...", current_mode);
+    console.log("handleModeChange(): The currently active mode seems to be ...", current_mode);
     current_mode = new_mode;
-    //console.log("handleModeChange(): The new mode selected seems to be ...", new_mode);
+    console.log("handleModeChange(): The new mode selected seems to be ...", new_mode);
 
     // Update the Bootstrap Dropdown Menu Text
     if (current_mode == "home")
@@ -201,7 +183,9 @@ function handleModeChange(new_mode)
 
     // FIXME - Try caching the previous results of this function globally so we 
     // don't have to query the database everytime we change a presentation mode.
-    handleFilterChange();
+    //handleFilterChange();
+    // - or -
+    UpdatePresentationWindow(current_data);
 
     console.log("Exiting handleModeChange()");
 
@@ -216,7 +200,10 @@ function UpdatePresentationWindow(json_data)
     //var mode = d3.select("#PresentationMode").value; 
     var mode = current_mode;    // Global variable
 
-    if      (mode == "globe")
+    if (mode == "home")
+        homeMethod(json_data);
+
+    else if (mode == "globe")
         globeMethod(json_data);
 
     else if (mode == "leaflet")
@@ -233,16 +220,20 @@ function homeMethod(json_data)
     console.log("Entering homeMethod()...");
 
     var globePath = "..\\static\\images\\globe.jpg";
+    var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
 
-    // Reset the summary and display divs to empty
+    // Reset the title, summary, and display divs to empty
+    titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
     //document.getElementById("Data_Presentation_Window").innerHTML = "";    
-    
+
+    titleArea.append("p").text("Welcome to the International Hurricane Database");
+
     //Add the summary
-    summaryArea.insert("h2").text("Home - Welcome to the International Hurricane Database");
+    //summaryArea.insert("h2").text("Home - Welcome to the International Hurricane Database");
     summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Above list under the dropdown menu you can select the type of data presentation you are interest in.");
     summaryArea.insert("p").text("Spirits gally coxswain bilge rat black jack salmagundi Brethren of the Coast cutlass hang the jib hornswaggle. Swab Sea Legs mizzen chandler bowsprit fathom bucko lass interloper crack Jennys tea cup. Bilged on her anchor gangplank Plate Fleet fore splice the main brace barque salmagundi draught nipperkin warp.");
     summaryArea.insert("p").text("Reef Blimey chandler killick nipperkin black jack sloop haul wind swing the lead bring a spring upon her cable. Case shot American Main spirits Jolly Roger crack Jennys tea cup Sink me chantey stern execution dock piracy. Hempen halter mutiny Brethren of the Coast trysail clap of thunder parrel hang the jib draught poop deck Privateer.");
@@ -260,12 +251,22 @@ function globeMethod(json_data)
     console.log("Entering globeMethod()...");
 
     var globePath = "..\\static\\images\\globe.jpg";
+    var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
 
-    // Reset the summary and display divs to empty
+    // Reset the ttile, summary, and display divs to empty
+    titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
+
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
+    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
+
+    titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
 
     summaryArea.insert("h2").text("Global View");
     summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
@@ -282,25 +283,41 @@ function leafletMethod(json_data)
 {
     console.log("Entering leafletMethod()...");
 
-    document.getElementById("Data_Presentation_Window").innerHTML = "";    
+    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
 
     hurricaneData = json_data;
     console.log("leafletMethod(): data ", hurricaneData);
 
-    // var selectedYear = 2001;
-    // var selectedName = "MICHELLE";
+    var titleArea = d3.select("#displayTitle");
+    var summaryArea = d3.select("#Data_Presentation_Summary");
+    var displayArea = d3.select("#Data_Presentation_Window");
 
-    // var filteredData = [];
-    // hurricaneData.forEach((row) =>
-    // {
-    //     if (Math.trunc(row.date_stamp/10000) == selectedYear
-    //         && row.name.trim().toUpperCase() == selectedName)
-    //     {
-    //         console.log("rowdata ", row);
-    //         filteredData.push(row);
-    //     }        
-    // });
-    
+    // Reset the ttile, summary, and display divs to empty
+    titleArea.html("");
+    summaryArea.html("");
+    displayArea.html("");
+
+    //var selectedYear = 2005;
+    //var selectedName = "KATRINA";
+
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
+    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
+
+    titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
+
+    var filteredData = [];
+    hurricaneData.forEach((row) =>
+    {
+        if (Math.trunc(row.date_stamp/10000) == selectedYear
+            && row.name.trim().toUpperCase() == selectedName)
+        {
+            console.log("rowdata ", row);
+            filteredData.push(row);
+        }        
+    });
 
     createMap(hurricaneData);
 
@@ -352,14 +369,24 @@ function UpdateTable(json_data) {
     var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
     var col_order = ["datestamp", "timestamp", "name", "city", "country", "max_wind", "latitude", "longitude"];
 
+    var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
 
     // Reset the summary and display divs to empty
+    titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
     //d3.select("tbody").selectAll("tr").remove();
-    
+
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
+    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
+
+    titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
+
     var table = displayArea.append("table")
     table.attr("class", "table table-striped");
     var thead = table.append("thead");
@@ -559,7 +586,9 @@ function InitDashboard()
     InitializeYearDropDownMenu();
     InitializeNameDropDownMenu();
 
-    //handleFilterChange();
+    // Do this to cache the json data into the global current_data variable
+    handleFilterChange();
+    handleModeChange('home');
 
     console.log("Exiting Init Dashboard()");
 }
