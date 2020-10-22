@@ -165,15 +165,16 @@ def searchFor():
     conds = []
     
     if (year):
-        string = "hurricane_table.date_stamp/10000 == {}".format(year)
+        string = [hurricane_table.date_stamp/10000 == "{}".format(year)]
         print(string)
-        conds.append(string)
+        conds = conds + string
 
     if (name):
-        string = "hurricane_table.name == {}".format(name)
+        string = [hurricane_table.name == "{}".format(name)]
         print(string)
-        conds.append(string)
+        conds = conds + string
 
+    #conds = [ hurricane_table.date_stamp/10000 == '2005', hurricane_table.name == 'KATRINA' ]
     print(conds)
 
     # Open a session, run the query, and then close the session again
@@ -187,10 +188,7 @@ def searchFor():
                             hurricane_table.country,
                             hurricane_table.new_latitude,
                             hurricane_table.new_longitude)\
-                                .filter(text(and_(*conds))).all()
-                                #.filter(hurricane_table.date_stamp/10000 == year)\
-                                #.filter(hurricane_table.name == name).all()
-                                
+                                .filter(and_(*conds)).all()                                
                                
     session.close 
 
@@ -262,7 +260,7 @@ def YearData():
         if date_time_year not in yearData:
             yearData.append(date_time_year)
 
-    yearData.sort()
+    yearData.sort(reverse=True)
 
     yearJson = []
     for year in yearData:
@@ -285,13 +283,21 @@ def NameData():
 
     nameData = []
     for name in results:
+        name_str = str(name[0])
+        if name_str not in nameData:
+            nameData.append(name_str)
+
+    nameData.sort()
+
+    nameJson = []
+    for name in nameData:
         dict = {}
         dict["name"] = name        
-        if dict not in nameData:
-            nameData.append(dict)
+        if dict not in nameJson:
+            nameJson.append(dict)
 
     # Return the jsonified result. 
-    return jsonify(nameData)
+    return jsonify(nameJson)
 
 # This statement is required for Flask to do its job. 
 # Think of it as chocolate cake recipe. 
