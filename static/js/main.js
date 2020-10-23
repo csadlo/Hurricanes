@@ -255,7 +255,7 @@ function globeMethod(json_data)
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
 
-    // Reset the ttile, summary, and display divs to empty
+    // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
@@ -290,12 +290,15 @@ function leafletMethod(json_data)
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-    var displayArea = d3.select("#Data_Presentation_Window");
+    //var displayArea = d3.selectAll("#Data_Presentation_Window > *");
 
-    // Reset the ttile, summary, and display divs to empty
+    d3.selectAll("#globeORleaflet > *").remove();
+
+    // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-    displayArea.html("");
+    //displayArea.html("");
+    //displayArea.remove();
 
     //var selectedYear = 2005;
     //var selectedName = "KATRINA";
@@ -319,7 +322,7 @@ function leafletMethod(json_data)
         }        
     });
 
-    createMap(hurricaneData);
+    createMap(filteredData);
 
     console.log("Exiting leafletMethod()..."); 
 }
@@ -329,7 +332,12 @@ function createMap(hurricaneData)
 {
     API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
     
-    var myMap = L.map("Data_Presentation_Window", {
+    // var myMap = L.map("Data_Presentation_Window", {
+    //     center: [30, -90],
+    //     zoom: 5
+    // });
+    
+    var myMap = L.map("globeORleaflet", {
         center: [30, -90],
         zoom: 5
     });       
@@ -373,7 +381,7 @@ function UpdateTable(json_data) {
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.select("#Data_Presentation_Window");
 
-    // Reset the summary and display divs to empty
+    // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
@@ -533,6 +541,8 @@ function UpdateNameDropDownMenu(json_data)
 
 function InitializeYearDropDownMenu()
 {
+    console.log("Testing 1 2 3");
+
     d3.json("/yearData").then(function(data) 
     {
         // selects the dropdown entity in the html

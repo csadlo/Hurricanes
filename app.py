@@ -59,6 +59,18 @@ def OtherRoute():
     webpage = render_template("other.html", title_we_want="Shirley")
     return webpage
 
+@app.route("/maptest")
+def MapTestRoute():
+    ''' This function runs when the user clicks the link for the other page.
+        Note that the html file must be located in a folder called templates. '''
+
+    # Note that this call to render template passes in the title parameter. 
+    # That title parameter is a 'Shirley' variable that could be called anything 
+    # we want. But, since we're using it to specify the page title, we call it 
+    # what we do. The name has to match the parameter used in other.html. 
+    webpage = render_template("maptest.html", title_we_want="Shirley")
+    return webpage
+
 @app.route("/hurricaneNames")
 def HurricaneNames():
     ''' Query the database for hurricanes and return the results as a JSON. '''
