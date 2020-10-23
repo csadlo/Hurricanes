@@ -303,9 +303,6 @@ function leafletMethod(json_data)
     //displayArea.remove();
     //document.getElementById("Data_Presentation_Window").classList.remove();
 
-    //var selectedYear = 2005;
-    //var selectedName = "KATRINA";
-
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
 
@@ -317,8 +314,10 @@ function leafletMethod(json_data)
     var filteredData = [];
     hurricaneData.forEach((row) =>
     {
-        if (Math.trunc(row.date_stamp/10000) == selectedYear
-            && row.name.trim().toUpperCase() == selectedName)
+//        if (Math.trunc(row.date_stamp/10000) == selectedYear
+//            && row.name.trim().toUpperCase() == selectedName)
+        if (isYearIncluded(selectedYear, row.date_stamp) 
+            && isNameIncluded(selectedName, row.name))
         {
             console.log("rowdata ", row);
             filteredData.push(row);
@@ -330,20 +329,59 @@ function leafletMethod(json_data)
     console.log("Exiting leafletMethod()..."); 
 }
 
+function isYearIncluded(yearCriteria, date) {
+    if ("ALL" === yearCriteria) {
+        return true;
+    } else {
+        return date.toString().substr(0, 4) === yearCriteria;
+    }
+}
+
+function isNameIncluded(nameCriteria, name) {
+    if ("ALL" === nameCriteria) {
+        return true;
+    } else {
+        return name.trim().toUpperCase() === nameCriteria;
+    }    
+}
+
+var myMap;
 
 function createMap(hurricaneData)
 {
-    //API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
+       
+    var totalLat = 0;
+    var totalLon = 0;
+    var recCount = 0;
     
-    var myMap = L.map("Data_Presentation_Window", {
-        center: [30, -90],
-        zoom: 5
+    for (var i = 0; i < hurricaneData.length; i++) 
+    {
+        if (hurricaneData[i].latitude && 
+            hurricaneData[i].longitude) {
+            totalLat += hurricaneData[i].latitude;
+            totalLon += hurricaneData[i].longitude;
+            recCount++;
+        }
+    }
+
+    var avgLat = 30;
+    var avgLon = -90;  
+    var zoomCnfg = 5;  
+    
+    if (recCount > 0) {
+        avgLat = totalLat / recCount;
+        avgLon = totalLon / recCount;        
+        zoomCnfg = recCount > 20 ? 3 : 8;
+    }
+
+    if (myMap) {
+        myMap.remove();
+    }
+    
+    myMap = L.map("Data_Presentation_Window", {
+        center: [avgLat, avgLon],
+        zoom: zoomCnfg
     });
-    
-    // var myMap = L.map("globeORleaflet", {
-    //     center: [30, -90],
-    //     zoom: 5
-    // });       
     
     // Adding tile layer
     L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
