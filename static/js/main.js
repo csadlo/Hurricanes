@@ -290,15 +290,18 @@ function leafletMethod(json_data)
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-    //var displayArea = d3.selectAll("#Data_Presentation_Window > *");
+    var displayArea = d3.selectAll("#Data_Presentation_Window > *");
 
-    d3.selectAll("#globeORleaflet > *").remove();
+    //d3.selectAll("#globeORleaflet > *").remove();
 
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-    //displayArea.html("");
+    displayArea.html("");
+    //document.getElementById("Data_Presentation_Window").attr('class','')
+
     //displayArea.remove();
+    //document.getElementById("Data_Presentation_Window").classList.remove();
 
     //var selectedYear = 2005;
     //var selectedName = "KATRINA";
@@ -330,17 +333,17 @@ function leafletMethod(json_data)
 
 function createMap(hurricaneData)
 {
-    API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
+    //API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
     
-    // var myMap = L.map("Data_Presentation_Window", {
-    //     center: [30, -90],
-    //     zoom: 5
-    // });
-    
-    var myMap = L.map("globeORleaflet", {
+    var myMap = L.map("Data_Presentation_Window", {
         center: [30, -90],
         zoom: 5
-    });       
+    });
+    
+    // var myMap = L.map("globeORleaflet", {
+    //     center: [30, -90],
+    //     zoom: 5
+    // });       
     
     // Adding tile layer
     L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -360,7 +363,7 @@ function createMap(hurricaneData)
         console.log("latitude ", lat);
         console.log("longitude ", lon);
 
-        L.marker([lon, lat]).addTo(myMap);
+        L.marker([lat, lon]).addTo(myMap);
     }
 }
 // LEAFLET METHOD ENDS HERE

@@ -45,8 +45,6 @@ function leafletMethod(json_data)
 
 function createMap(hurricaneData)
 {
-    API_KEY = "pk.eyJ1IjoiZ2dkZWNhcGlhIiwiYSI6ImNrZnlrYXR6YTIwcWoyenMzajVlNmNpbjMifQ.pn8b5lfUp6SHiYlZ60s8EQ"    
-
     var myMap = L.map("globeORleaflet", {
         center: [30, -90],
         zoom: 5
@@ -70,7 +68,7 @@ function createMap(hurricaneData)
         console.log("latitude ", lat);
         console.log("longitude ", lon);
 
-        L.marker([lon, lat]).addTo(myMap);
+        L.marker([lat, lon]).addTo(myMap);
     }
 }
 // LEAFLET METHOD ENDS HERE
