@@ -21,6 +21,8 @@
     <!-- <link rel="stylesheet" href="style.css"> -->
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+    <!-- ADDED FOR JAVALIB -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <!-- Our CSS -->
     <link rel="stylesheet" type="text/css" href="../static/css/style.css">
@@ -42,7 +44,7 @@
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle current_mode" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dropdown Options
+                        Visualizations
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
                         <!--
@@ -56,8 +58,8 @@
                         <li class="dropdown-item" onclick="handleModeChange('home')" href="#">Home</li>
                         <li class="dropdown-item" onclick="handleModeChange('globe')" href="#">Globe</li>
                         <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Leaflet</li>
-                        <li class="dropdown-item active" onclick="handleModeChange('table')" href="#">Table</li>
-                        <li class="dropdown-item disabled" onclick="handleModeChange('FIXME')" href="#">javaLib</li>
+                        <li class="dropdown-item" onclick="handleModeChange('table')" href="#">Table</li>
+                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">javaLib</li>
                         <li class="dropdown-item disabled" onclick="handleModeChange('FIXME')"href="">Data</li>
                     </ul>
                 </li>

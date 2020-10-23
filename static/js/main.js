@@ -169,17 +169,17 @@ function handleModeChange(new_mode)
 
     // Update the Bootstrap Dropdown Menu Text
     if (current_mode == "home")
-        $('#navbarDropdown').text("Dropdown Options - Home");
+        $('#navbarDropdown').text("Visualization - Home");
     else if (current_mode == "globe")
-        $('#navbarDropdown').text("Dropdown Options - Globe");
+        $('#navbarDropdown').text("Visualization - Globe");
     else if (current_mode == "leaflet")
-        $('#navbarDropdown').text("Dropdown Options - Leaflet");
+        $('#navbarDropdown').text("Visualization - Leaflet");
     else if (current_mode == "table")
-        $('#navbarDropdown').text("Dropdown Options - Table");
-    else if (current_mode == "FIXME")
-        $('#navbarDropdown').text("Dropdown Options - FIXME");
+        $('#navbarDropdown').text("Visualization - Table");
+    else if (current_mode == "javaLib")
+        $('#navbarDropdown').text("Visualization - javaLib");
     else
-        $('#navbarDropdown').text("Dropdown Options - FIXME");
+        $('#navbarDropdown').text("Visualization - FIXME");
 
     // FIXME - Try caching the previous results of this function globally so we 
     // don't have to query the database everytime we change a presentation mode.
@@ -196,6 +196,12 @@ function UpdatePresentationWindow(json_data)
 {
     console.log("Entering UpdatePresentationWindow()");
 
+    d3.selectAll("#Data_Presentation_Window > *").remove();
+
+    if (chart) {
+        chart.destroy();
+    }
+
     //var mode = d3.select("#PresentationMode").property("value");
     //var mode = d3.select("#PresentationMode").value; 
     var mode = current_mode;    // Global variable
@@ -211,6 +217,9 @@ function UpdatePresentationWindow(json_data)
 
     else if (mode == "table")
         UpdateTable(json_data);
+
+    else if (mode == "javaLib")
+        javalibMethod(json_data);
 
     console.log("Exiting UpdatePresentationWindow()");
 }
@@ -283,8 +292,6 @@ function leafletMethod(json_data)
 {
     console.log("Entering leafletMethod()...");
 
-    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
-
     hurricaneData = json_data;
     console.log("leafletMethod(): data ", hurricaneData);
 
@@ -292,16 +299,10 @@ function leafletMethod(json_data)
     var summaryArea = d3.select("#Data_Presentation_Summary");
     var displayArea = d3.selectAll("#Data_Presentation_Window > *");
 
-    //d3.selectAll("#globeORleaflet > *").remove();
-
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
-    //document.getElementById("Data_Presentation_Window").attr('class','')
-
-    //displayArea.remove();
-    //document.getElementById("Data_Presentation_Window").classList.remove();
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -314,8 +315,6 @@ function leafletMethod(json_data)
     var filteredData = [];
     hurricaneData.forEach((row) =>
     {
-//        if (Math.trunc(row.date_stamp/10000) == selectedYear
-//            && row.name.trim().toUpperCase() == selectedName)
         if (isYearIncluded(selectedYear, row.date_stamp) 
             && isNameIncluded(selectedName, row.name))
         {
@@ -345,11 +344,16 @@ function isNameIncluded(nameCriteria, name) {
     }    
 }
 
-var myMap;
+var myMap; // leaflet map
+var chart; //apex chart
 
 function createMap(hurricaneData)
 {
-       
+
+    if (myMap) {
+        myMap.remove();
+    }
+
     var totalLat = 0;
     var totalLon = 0;
     var recCount = 0;
@@ -371,11 +375,7 @@ function createMap(hurricaneData)
     if (recCount > 0) {
         avgLat = totalLat / recCount;
         avgLon = totalLon / recCount;        
-        zoomCnfg = recCount > 20 ? 3 : 8;
-    }
-
-    if (myMap) {
-        myMap.remove();
+        zoomCnfg = recCount > 10 ? 3 : 8;
     }
     
     myMap = L.map("Data_Presentation_Window", {
@@ -401,12 +401,119 @@ function createMap(hurricaneData)
         console.log("latitude ", lat);
         console.log("longitude ", lon);
 
-        L.marker([lat, lon]).addTo(myMap);
+        var marker = L.marker([lat, lon]);
+        marker.bindPopup("Name: " + hurricaneData[i].name +
+                         "<br/>Nearest City: " + hurricaneData[i].city + 
+                         "<br/>Nearest Country: " + hurricaneData[i].country +
+                         "<hr/>Coordinates: " + hurricaneData[i].latitude +
+                         ", " + hurricaneData[i].longitude
+                         );     
+        marker.on("mouseover", function(e) {
+            this.openPopup();
+        });
+        marker.on("mouseout", function(e) {
+            this.closePopup();
+        });        
+        marker.addTo(myMap);
     }
+
+
 }
 // LEAFLET METHOD ENDS HERE
 
+// JAVALIB METHOD STARTS HERE
+function javalibMethod(json_data)
+{
+    d3.selectAll("#Data_Presentation_Window > *").remove();
 
+    hurricaneData = json_data;
+
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
+    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
+
+    var filteredData = [];   
+    var filteredNames = [];   
+    var filteredDatestamp = [];   
+    var filteredMaxWind = [];   
+    hurricaneData.forEach((row) =>
+    {
+        if (isYearIncluded(selectedYear, row.date_stamp) 
+            && isNameIncluded(selectedName, row.name))
+        {
+            console.log("rowdata ", row);
+            filteredData.push(row);
+            filteredNames.push(row.name);
+            filteredDatestamp.push(row.date_stamp);
+            filteredMaxWind.push(row.max_wind);
+
+        }        
+    });
+    console.log("javalib filteredData  ", filteredData);
+    console.log("javalib filteredNames  ", filteredNames);
+    console.log("javalib filteredDatestamp  ", filteredDatestamp);
+    console.log("javalib filteredMaxWind  ", filteredMaxWind);
+    
+    d3.selectAll("#displayTitle > *").remove();
+    d3.select("#displayTitle").append("p").text("Hurricane " + selectedName + ", Year " + selectedYear);
+
+    var options = {
+        chart: 
+        {
+            type: 'bar',
+            animations: 
+            {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800,
+                animateGradually: {
+                    enabled: true,
+                    delay: 150
+                },
+                dynamicAnimation: {
+                    enabled: true,
+                    speed: 350
+                }
+            }
+        },
+        series: 
+        [{
+            name: 'Max Wind',
+            data: filteredMaxWind
+        }],
+        xaxis: 
+        {
+            name: 'Datestamp',
+            labels: 
+            {
+                formatter: function(value, timestamp, opts) 
+                {
+                    var dateStr = value.toString();
+                    return dateStr.toString().substring(4, 6) + "/" 
+                     + dateStr.toString().substring(6, 8) + "/"
+                     + dateStr.substring(0, 4);
+                }
+            },
+            categories: filteredDatestamp
+        }, 
+        tooltip: 
+        {
+            x: 
+            {
+              show: false,
+              formatter: undefined,
+            }
+        }
+
+    }
+      
+    chart = new ApexCharts(document.querySelector("#Data_Presentation_Window"), options);
+    chart.render();
+      
+}
+// JAVALIB METHOD ENDS HERE
 
 function UpdateTable(json_data) {
 
