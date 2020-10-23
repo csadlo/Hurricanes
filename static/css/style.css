@@ -16,7 +16,7 @@ html {
     color: rgb(15, 15, 27)
   }
   
-   .hero {
+  .hero {
     position: relative;
     height: 650px;
     padding: 25px;
@@ -26,6 +26,15 @@ html {
     background-attachment: fixed;
     background-position: top right;
     background-size: cover;
+  }
+
+  .hero h1 {
+    color: white;
+  }
+  
+  .hero .quote {
+    color: white;
+    font-size:x-large;
   }
     #table-area tbody td {
       display: block;

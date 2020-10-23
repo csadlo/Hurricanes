@@ -21,12 +21,14 @@ var search_button = d3.select("#search-btn");
 search_button.on("click", handleFilterChange);
 
 // Uncomment this if you want the website to refresh when clicking off of a filter form
+//yearInputElement.on("change", handleFilterChange);
 yearInputElement.on("change", handleFilterChange);
 nameInputElement.on("change", handleFilterChange);
 cityInputElement.on("change", handleFilterChange);
 countryInputElement.on("change", handleFilterChange);
 categoryInputElement.on("change", handleFilterChange);
 windInputElement.on("change", handleFilterChange);
+
 
 // Create event handlers 
 //search_button.on("click", runEnter);
@@ -243,9 +245,9 @@ function homeMethod(json_data)
 
     //Add the summary
     //summaryArea.insert("h2").text("Home - Welcome to the International Hurricane Database");
-    summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Above list under the dropdown menu you can select the type of data presentation you are interest in.");
-    summaryArea.insert("p").text("Spirits gally coxswain bilge rat black jack salmagundi Brethren of the Coast cutlass hang the jib hornswaggle. Swab Sea Legs mizzen chandler bowsprit fathom bucko lass interloper crack Jennys tea cup. Bilged on her anchor gangplank Plate Fleet fore splice the main brace barque salmagundi draught nipperkin warp.");
-    summaryArea.insert("p").text("Reef Blimey chandler killick nipperkin black jack sloop haul wind swing the lead bring a spring upon her cable. Case shot American Main spirits Jolly Roger crack Jennys tea cup Sink me chantey stern execution dock piracy. Hempen halter mutiny Brethren of the Coast trysail clap of thunder parrel hang the jib draught poop deck Privateer.");
+    summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Use the dropdown menu above to change the visualization type.");
+    summaryArea.insert("p").text("This data comes from the HURDAT2, the NOAA's hurricane database, by way of Kaggle.");
+    summaryArea.insert("p").text("Project by Chris Sadlo, Glenda Decapia, Katrice Trahan, and Sarah Kachelmeier");
 
     displayArea.append("img")
        .attr("src", globePath)
@@ -304,44 +306,8 @@ function leafletMethod(json_data)
     summaryArea.html("");
     displayArea.html("");
 
-    // Returns a dictionary of the filter bar values
-    inputs = GetFilterBarInputValues();
-
-    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
-    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
-
-    titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
-
-    var filteredData = [];
-    hurricaneData.forEach((row) =>
-    {
-        if (isYearIncluded(selectedYear, row.date_stamp) 
-            && isNameIncluded(selectedName, row.name))
-        {
-            console.log("rowdata ", row);
-            filteredData.push(row);
-        }        
-    });
-
-    createMap(filteredData);
-
+    createMap(json_data);
     console.log("Exiting leafletMethod()..."); 
-}
-
-function isYearIncluded(yearCriteria, date) {
-    if ("ALL" === yearCriteria) {
-        return true;
-    } else {
-        return date.toString().substr(0, 4) === yearCriteria;
-    }
-}
-
-function isNameIncluded(nameCriteria, name) {
-    if ("ALL" === nameCriteria) {
-        return true;
-    } else {
-        return name.trim().toUpperCase() === nameCriteria;
-    }    
 }
 
 var myMap; // leaflet map
@@ -434,24 +400,17 @@ function javalibMethod(json_data)
     var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
     var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
 
-    var filteredData = [];   
     var filteredNames = [];   
     var filteredDatestamp = [];   
     var filteredMaxWind = [];   
+
     hurricaneData.forEach((row) =>
     {
-        if (isYearIncluded(selectedYear, row.date_stamp) 
-            && isNameIncluded(selectedName, row.name))
-        {
-            console.log("rowdata ", row);
-            filteredData.push(row);
-            filteredNames.push(row.name);
-            filteredDatestamp.push(row.date_stamp);
-            filteredMaxWind.push(row.max_wind);
-
-        }        
+        filteredNames.push(row.name);
+        filteredDatestamp.push(row.date_stamp);
+        filteredMaxWind.push(row.max_wind);
     });
-    console.log("javalib filteredData  ", filteredData);
+
     console.log("javalib filteredNames  ", filteredNames);
     console.log("javalib filteredDatestamp  ", filteredDatestamp);
     console.log("javalib filteredMaxWind  ", filteredMaxWind);
@@ -500,15 +459,16 @@ function javalibMethod(json_data)
         }, 
         tooltip: 
         {
-            x: 
-            {
-              show: false,
-              formatter: undefined,
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                return "<span><b>Name</b>: " + filteredNames[dataPointIndex] + "<br/>" +
+                            "<b>Max Wind</b>: " +
+                            series[seriesIndex][dataPointIndex] +
+                            "&nbsp;knots</span>"                
             }
         }
 
     }
-      
+
     chart = new ApexCharts(document.querySelector("#Data_Presentation_Window"), options);
     chart.render();
       
