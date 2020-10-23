@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>IHDB</title>
+    <title>HURRICANE</title>
 
     <!-- Import the Plotly library. Note that this has to 
         happen before we importa any code that uses Plotly. -->
@@ -54,14 +54,6 @@
                         Visualizations
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
-                        <!--
-                        <li class="dropdown-item">Home</li>
-                        <li class="dropdown-item">Globe</li>
-                        <li class="dropdown-item">Leaflet</li>
-                        <li class="dropdown-item active">Table</li>
-                        <li class="dropdown-item disabled">javaLib</li>
-                        <li class="dropdown-item disabled">Data</li> 
-                        -->
                         <li class="dropdown-item" onclick="handleModeChange('home')" href="#">Home</li>
                         <li class="dropdown-item" onclick="handleModeChange('globe')" href="#">Globe</li>
                         <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Leaflet</li>
@@ -71,20 +63,10 @@
                     </ul>
                 </li>
             </ul>
-            <!--
-            <script> 
-            $(document).ready(function() { 
-                $('li').click(function() { 
-                    $('li.dropdown-item.active').removeClass("active"); 
-                    $(this).addClass("active"); 
-                }); 
-            }); 
-            </script> 
-            -->
             <form class="form-inline my-2 my-lg-0">
-                <a class="nav-link" href="">Data <span class="sr-only">(current)</span></a>        
                 <a class="nav-link" href="">About <span class="sr-only">(current)</span></a>
             </form>
+
         </div>
     </nav>
     
@@ -129,12 +111,6 @@
 
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2" id="displayTitle">[Display Title]</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group mr-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Download</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Print</button>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="Data_Presentation_Summary">
