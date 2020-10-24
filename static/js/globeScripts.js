@@ -7,7 +7,6 @@
 
 
 
-//function ready(error, world, places) {
 function ready(error, world, places) {
 
     console.log("Entering READY....");
@@ -170,7 +169,9 @@ function mouseup() {
 
 function refresh() {
     console.log("Refreshing...");
-    svg.selectAll("path").attr("d", path);
+    svg.selectAll("path").attr("d", path);  // Rotates the countries
+    //svg.selectAll('circle')
+    plotMarkers();
     svg.selectAll(".land").attr("d", path);
     svg.selectAll(".countries path").attr("d", path);
     svg.selectAll(".graticule").attr("d", path);

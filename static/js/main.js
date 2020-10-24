@@ -280,9 +280,10 @@ function UpdatePresentationWindow(json_data)
     if (mode == "home")
         homeMethod(json_data);
 
-    else if (mode == "globe")
+    else if (mode == "globe") {
+        UpdateGlobeMethod();
         globeMethod(json_data);
-
+    }
     else if (mode == "leaflet")
         leafletMethod(json_data);
 
@@ -388,8 +389,6 @@ function globeMethod(json_data)
     
     proj.rotate([90, -30, 0]);
 
-console.log("Flag 3");
-
     d3.json("../static/js/world-110m.json")
       .then((worldData) => {
             svg.selectAll(".segment")
@@ -403,8 +402,6 @@ console.log("Flag 3");
             .style("opacity", ".8");          
       });
 
-console.log("Flag 4");
-
     svg.append("path")
        .datum(graticule)
        .attr("class", "graticule")
@@ -412,14 +409,10 @@ console.log("Flag 4");
        .style("fill", "white") 
        .style("stroke", "blue"); 
 
-console.log("Flag 5");
-
     for (var i = 0; i < hurricaneData.length; i++) 
     {
        coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude]);
     }       
-
-console.log("Flag 6");
 
     /*d3.select(window)
        .on("mousemove", mousemove)
@@ -464,7 +457,10 @@ function rotateGlobe() {
 }   
 
 function plotMarkers() {
-    var markerGroup = svg.append("g");    
+
+    svg.selectAll("g").remove();     // Clean up any old markers
+
+    var markerGroup = svg.append("g");
     var markers = markerGroup.selectAll('circle').data(coordinates);
     markers
         .enter()
@@ -484,111 +480,19 @@ function plotMarkers() {
     });
 }
 
+function UpdateGlobeMethod() {
 
-function ready(world, places) {
+    // Deletes all the markers
+    d3.select("#Data_Presentation_Window").selectAll("g").html("");
+    d3.select("#Data_Presentation_Window").selectAll("g").remove();
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    //globe
 
-    console.log("Entering READY....");
-    console.log("Entering READY....");
-    console.log("Entering READY....");
-    console.log("Entering READY....");
-    console.log("Entering READY....");
-
-    var ocean_fill = svg.append("defs").append("radialGradient")
-          .attr("id", "ocean_fill")
-          .attr("cx", "75%")
-          .attr("cy", "25%");
-    ocean_fill.append("stop").attr("offset", "5%").attr("stop-color", "#ddf");
-    ocean_fill.append("stop").attr("offset", "100%").attr("stop-color", "#9ab");
-
-    var globe_highlight = svg.append("defs").append("radialGradient")
-        .attr("id", "globe_highlight")
-        .attr("cx", "75%")
-        .attr("cy", "25%");
-    globe_highlight.append("stop")
-        .attr("offset", "5%").attr("stop-color", "#ffd")
-        .attr("stop-opacity","0.6");
-    globe_highlight.append("stop")
-        .attr("offset", "100%").attr("stop-color", "#ba9")
-        .attr("stop-opacity","0.2");
-
-    var globe_shading = svg.append("defs").append("radialGradient")
-        .attr("id", "globe_shading")
-        .attr("cx", "50%")
-        .attr("cy", "40%");
-    globe_shading.append("stop")
-        .attr("offset","50%").attr("stop-color", "#9ab")
-        .attr("stop-opacity","0")
-    globe_shading.append("stop")
-        .attr("offset","100%").attr("stop-color", "#3e6184")
-        .attr("stop-opacity","0.3")
-
-    var drop_shadow = svg.append("defs").append("radialGradient")
-        .attr("id", "drop_shadow")
-        .attr("cx", "50%")
-        .attr("cy", "50%");
-    drop_shadow.append("stop")
-        .attr("offset","20%").attr("stop-color", "#000")
-        .attr("stop-opacity",".5")
-    drop_shadow.append("stop")
-        .attr("offset","100%").attr("stop-color", "#000")
-        .attr("stop-opacity","0")  
-
-    svg.append("ellipse")
-        .attr("cx", 440).attr("cy", 450)
-        .attr("rx", proj.scale()*.90)
-        .attr("ry", proj.scale()*.25)
-        .attr("class", "noclicks")
-        .style("fill", "url(#drop_shadow)");
-
-    svg.append("circle")
-        .attr("cx", width / 2).attr("cy", height / 2)
-        .attr("r", proj.scale())
-        .attr("class", "noclicks")
-        .style("fill", "url(#ocean_fill)");
-    
-    svg.append("path")
-        .datum(topojson.object(world, world.objects.land))
-        .attr("class", "land")
-        .attr("d", path);
-
-    svg.append("path")
-        .datum(graticule)
-        .attr("class", "graticule noclicks")
-        .attr("d", path);
-
-    svg.append("circle")
-        .attr("cx", width / 2).attr("cy", height / 2)
-        .attr("r", proj.scale())
-        .attr("class","noclicks")
-        .style("fill", "url(#globe_highlight)");
-
-    svg.append("circle")
-        .attr("cx", width / 2).attr("cy", height / 2)
-        .attr("r", proj.scale())
-        .attr("class","noclicks")
-        .style("fill", "url(#globe_shading)");
-
-    svg.append("g").attr("class","points")
-        .selectAll("text").data(places.features)
-        .enter().append("path")
-        .attr("class", "point")
-        .attr("d", path);
-
-    svg.append("g").attr("class","labels")
-        .selectAll("text").data(places.features)
-        .enter().append("text")
-        .attr("class", "label")
-        .text(function(d) { return d.properties.name })
-
-    // uncomment for hover-able country outlines
-
-    // svg.append("g").attr("class","countries")
-    //   .selectAll("path")
-    //     .data(topojson.object(world, world.objects.countries).geometries)
-    //   .enter().append("path")
-    //     .attr("d", path); 
-
-    //position_labels();
 }
 
 
