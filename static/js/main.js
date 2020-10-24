@@ -325,26 +325,31 @@ function homeMethod(json_data)
     console.log("Exiting homeMethod()...");
 }
 
+
+var proj;
+var path;
+var graticule;
 var svg;
-const projection = d3.geoOrthographic();
-const path = d3.geoPath().projection(projection);
+
+
+//const projection = d3.geoOrthographic();
+//const path = d3.geoPath().projection(projection);
 var coordinates = [];
-var width = 1000, height = 1000;
+var width = 640, height = 640;
 const center = [width/2, height/2];
 
 function globeMethod(json_data)
 {
     console.log("Entering globeMethod()...");
 
-//    var globePath = "..\\static\\images\\globe.jpg";
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-//    var displayArea = d3.select("#Data_Presentation_Window");
+    //var displayArea = d3.select("#Data_Presentation_Window");
 
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-//    displayArea.html("");
+    //displayArea.html("");
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -357,22 +362,34 @@ function globeMethod(json_data)
     summaryArea.insert("h2").text("Global View");
     summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
 
-//    displayArea.append("img")
-//       .attr("src", globePath)
-//       .attr("width", "500")
-//       .attr("height", "500");
-
     hurricaneData = json_data;
 
     //projection = d3.geoOrthographic();
     //path = d3.geoPath().projection(projection);
 
+    d3.select(window)
+        .on("mousemove", mousemove)
+        .on("mouseup", mouseup);
+
+    proj = d3.geoOrthographic()
+        .scale(300)     // Changes size of the projection
+        .translate([width / 2, height / 2])
+        .clipAngle(90);     // Changes the visible horizon
+
     svg = d3.select("#Data_Presentation_Window")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .on("mousedown", mousedown);
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mousedown", mousedown);
+
+    path = d3.geoPath().projection(proj).pointRadius(1.5);
+
+    graticule = d3.geoGraticule().step([10, 10]);
     
+    proj.rotate([90, -30, 0]);
+
+console.log("Flag 3");
+
     d3.json("../static/js/world-110m.json")
       .then((worldData) => {
             svg.selectAll(".segment")
@@ -386,7 +403,7 @@ function globeMethod(json_data)
             .style("opacity", ".8");          
       });
 
-    var graticule = d3.geoGraticule().step([10, 10]);
+console.log("Flag 4");
 
     svg.append("path")
        .datum(graticule)
@@ -395,28 +412,25 @@ function globeMethod(json_data)
        .style("fill", "white") 
        .style("stroke", "blue"); 
 
+console.log("Flag 5");
+
     for (var i = 0; i < hurricaneData.length; i++) 
     {
        coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude]);
     }       
 
-    //projection.rotate([90, 0, 0]);
-    rotateGlobe();
-    plotMarkers();
+console.log("Flag 6");
 
-    d3.select(window)
+    /*d3.select(window)
        .on("mousemove", mousemove)
        .on("mouseup", mouseup);
-   
+    */
     console.log(d3.geo);
 
-    var proj = d3.geoOrthographic()
-       .scale(220)
-       .translate([width / 2, height / 2])
-       .clipAngle(90);
+    proj.rotate([90, -30, 0]);
+    //rotateGlobe();
+    plotMarkers();
    
-   
-    var path = d3.geo.path().projection(proj).pointRadius(1.5);
    
     //var graticule = d3.geo.graticule();
    
@@ -425,11 +439,12 @@ function globeMethod(json_data)
     //            .attr("height", height)
     //            .on("mousedown", mousedown);
    
+    /*
     queue()
-       .defer(d3.json, "world-110m.json")
-       .defer(d3.json, "places.json")
-       .await(ready);
-   
+       .defer(d3.json, "../static/js/world-110m.json")
+       .defer(d3.json, "../static/js/places.json")
+       .await(ready());
+    */
 
     console.log("Exiting globeMethod()..."); 
 }
@@ -442,9 +457,9 @@ const config = {
 
 function rotateGlobe() {
     d3.timer(function (elapsed) {
-        projection.rotate([config.speed * elapsed - 120, config.verticalTilt, config.horizontalTilt]);
+        proj.rotate([config.speed * elapsed + 60, config.verticalTilt, config.horizontalTilt]);
         svg.selectAll("path").attr("d", path);
-        plotMarkers();
+        //plotMarkers();
     });
 }   
 
@@ -455,11 +470,11 @@ function plotMarkers() {
         .enter()
         .append('circle')
         .merge(markers)
-        .attr('cx', d => projection(d)[0])
-        .attr('cy', d => projection(d)[1]) 
+        .attr('cx', d => proj(d)[0])
+        .attr('cy', d => proj(d)[1]) 
         .attr('fill', d => {
             const coordinate = [d[0], d[1]];
-            gdistance = d3.geoDistance(coordinate, projection.invert(center)); 
+            gdistance = d3.geoDistance(coordinate, proj.invert(center)); 
             return gdistance > 1.57 ? 'none' : '#14db3f'; 
         })
         .attr('r', 3); 
@@ -468,6 +483,114 @@ function plotMarkers() {
         this.parentNode.appendChild(this);
     });
 }
+
+
+function ready(world, places) {
+
+    console.log("Entering READY....");
+    console.log("Entering READY....");
+    console.log("Entering READY....");
+    console.log("Entering READY....");
+    console.log("Entering READY....");
+
+    var ocean_fill = svg.append("defs").append("radialGradient")
+          .attr("id", "ocean_fill")
+          .attr("cx", "75%")
+          .attr("cy", "25%");
+    ocean_fill.append("stop").attr("offset", "5%").attr("stop-color", "#ddf");
+    ocean_fill.append("stop").attr("offset", "100%").attr("stop-color", "#9ab");
+
+    var globe_highlight = svg.append("defs").append("radialGradient")
+        .attr("id", "globe_highlight")
+        .attr("cx", "75%")
+        .attr("cy", "25%");
+    globe_highlight.append("stop")
+        .attr("offset", "5%").attr("stop-color", "#ffd")
+        .attr("stop-opacity","0.6");
+    globe_highlight.append("stop")
+        .attr("offset", "100%").attr("stop-color", "#ba9")
+        .attr("stop-opacity","0.2");
+
+    var globe_shading = svg.append("defs").append("radialGradient")
+        .attr("id", "globe_shading")
+        .attr("cx", "50%")
+        .attr("cy", "40%");
+    globe_shading.append("stop")
+        .attr("offset","50%").attr("stop-color", "#9ab")
+        .attr("stop-opacity","0")
+    globe_shading.append("stop")
+        .attr("offset","100%").attr("stop-color", "#3e6184")
+        .attr("stop-opacity","0.3")
+
+    var drop_shadow = svg.append("defs").append("radialGradient")
+        .attr("id", "drop_shadow")
+        .attr("cx", "50%")
+        .attr("cy", "50%");
+    drop_shadow.append("stop")
+        .attr("offset","20%").attr("stop-color", "#000")
+        .attr("stop-opacity",".5")
+    drop_shadow.append("stop")
+        .attr("offset","100%").attr("stop-color", "#000")
+        .attr("stop-opacity","0")  
+
+    svg.append("ellipse")
+        .attr("cx", 440).attr("cy", 450)
+        .attr("rx", proj.scale()*.90)
+        .attr("ry", proj.scale()*.25)
+        .attr("class", "noclicks")
+        .style("fill", "url(#drop_shadow)");
+
+    svg.append("circle")
+        .attr("cx", width / 2).attr("cy", height / 2)
+        .attr("r", proj.scale())
+        .attr("class", "noclicks")
+        .style("fill", "url(#ocean_fill)");
+    
+    svg.append("path")
+        .datum(topojson.object(world, world.objects.land))
+        .attr("class", "land")
+        .attr("d", path);
+
+    svg.append("path")
+        .datum(graticule)
+        .attr("class", "graticule noclicks")
+        .attr("d", path);
+
+    svg.append("circle")
+        .attr("cx", width / 2).attr("cy", height / 2)
+        .attr("r", proj.scale())
+        .attr("class","noclicks")
+        .style("fill", "url(#globe_highlight)");
+
+    svg.append("circle")
+        .attr("cx", width / 2).attr("cy", height / 2)
+        .attr("r", proj.scale())
+        .attr("class","noclicks")
+        .style("fill", "url(#globe_shading)");
+
+    svg.append("g").attr("class","points")
+        .selectAll("text").data(places.features)
+        .enter().append("path")
+        .attr("class", "point")
+        .attr("d", path);
+
+    svg.append("g").attr("class","labels")
+        .selectAll("text").data(places.features)
+        .enter().append("text")
+        .attr("class", "label")
+        .text(function(d) { return d.properties.name })
+
+    // uncomment for hover-able country outlines
+
+    // svg.append("g").attr("class","countries")
+    //   .selectAll("path")
+    //     .data(topojson.object(world, world.objects.countries).geometries)
+    //   .enter().append("path")
+    //     .attr("d", path); 
+
+    //position_labels();
+}
+
 
 function leafletMethod(json_data)
 {
