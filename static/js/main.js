@@ -14,6 +14,7 @@ var cityInputElement = d3.select("#cityform");
 var countryInputElement = d3.select("#countryform");
 var categoryInputElement = d3.select("#categoryform");
 var windInputElement = d3.select("#windform");
+var minwindInputElement = d3.select("#minwindform");
 var oceanInputElement = d3.select("#oceanform");
 
 
@@ -30,6 +31,7 @@ cityInputElement.on("change", handleFilterChange);
 countryInputElement.on("change", handleFilterChange);
 categoryInputElement.on("change", handleFilterChange);
 windInputElement.on("change", handleFilterChange);
+minwindInputElement.on("change", handleFilterChange);
 oceanInputElement.on("change", handleFilterChange);
 
 
@@ -62,6 +64,7 @@ function GetFilterBarInputValues()
     dict["country"]     = countryInputElement.property("value");
     dict["category"]    = categoryInputElement.property("value");
     dict["wind"]        = windInputElement.property("value");
+    dict["minwind"]     = minwindInputElement.property("value");
     dict["ocean"]       = oceanInputElement.property("value");
 
 
@@ -90,6 +93,7 @@ function handleFilterChange(event) {
     countryform_value = inputs["country"];  // could be "ALL" or could be a specific value
     categoryform_value = inputs["category"];  // could be "ALL" or could be a specific value
     windform_value = inputs["wind"];  // could be "ALL" or could be a specific value
+    minwindform_value = inputs["minwind"];  // could be "ALL" or could be a specific value
     oceanform_value = inputs["ocean"];  // could be "ALL" or could be a specific value
 
 
@@ -157,6 +161,16 @@ function handleFilterChange(event) {
         num_params++;
     }
 
+    if (minwindform_value && IsSpecificValue(minwindform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("minwind=");
+        search_url = search_url.concat(minwindform_value);
+        num_params++;
+    }
+
     if (oceanform_value && IsSpecificValue(oceanform_value)) 
     {
         if (num_params > 0)    // Means we're dealing with multiple parameters
@@ -189,6 +203,7 @@ function handleFilterChange(event) {
         UpdateDropDownMenu("country", current_data);
         UpdateDropDownMenu("category", current_data);
         UpdateDropDownMenu("wind", current_data);
+        UpdateDropDownMenu("minwind", current_data);
         UpdateDropDownMenu("ocean", current_data);
     });
 
@@ -457,7 +472,7 @@ function rotateGlobe() {
 }   
 
 function color_scale(wind) {
-    
+
     if (wind < 35)
         return '#000080';   // Navy Blue
     else if (wind < 74)
@@ -508,8 +523,6 @@ function plotMarkers() {
     });
 
 }
-
-
 
 function UpdateGlobeMethod() {
 
@@ -687,6 +700,12 @@ function javalibMethod(json_data)
                 }
             }
         },
+        /*
+        stroke: {
+            width: 5,
+            curve: 'straight',
+            //dashArray: [0, 8, 5]
+        },*/
         series: 
         [{
             name: 'Wind (MPH)',
@@ -931,6 +950,10 @@ function UpdateDropDownMenu(type, json_data)
             selector_string = "Wind Speeds"
             selector = windInputElement 
         }
+        if (type == "minwind") {
+            selector_string = "Wind Speeds"
+            selector = minwindInputElement 
+        }
         if (type == "ocean") {
             selector_string = "Oceans"
             selector = oceanInputElement 
@@ -969,6 +992,10 @@ function UpdateDropDownMenu(type, json_data)
                     uniqueValues.push(record.country);
             }
             if (type == "wind") {
+                if (!uniqueValues.includes(parseInt(record.wind)))
+                    uniqueValues.push(parseInt(record.wind));
+            }
+            if (type == "minwind") {
                 if (!uniqueValues.includes(parseInt(record.wind)))
                     uniqueValues.push(parseInt(record.wind));
             }
@@ -1134,6 +1161,28 @@ function InitializeWindSpeedDropDownMenu()
     }); 
 }
 
+function InitializeMinWindSpeedDropDownMenu()
+{
+    d3.json("/searchForUnique?type=wind").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#minwindform");
+        console.log("InitializeMinWindSpeedDropDownMenu: wind data ", data)
+
+        selector.append("option")
+        .text("All Wind Speeds")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.wind)
+          .property("value", record.wind);
+        });
+    }); 
+}
+
 function InitializeOceanDropDownMenu()
 {
     d3.json("/searchForUnique?type=ocean").then(function(data) 
@@ -1169,6 +1218,7 @@ function InitDashboard()
     InitializeCountryDropDownMenu();
     InitializeCategoryDropDownMenu();
     InitializeWindSpeedDropDownMenu();
+    InitializeMinWindSpeedDropDownMenu();
     InitializeOceanDropDownMenu();
 
     // Do this to cache the json data into the global current_data variable

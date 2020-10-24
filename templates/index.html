@@ -76,9 +76,9 @@
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
                         <li class="dropdown-item" onclick="handleModeChange('home')" href="#">Home</li>
                         <li class="dropdown-item" onclick="handleModeChange('globe')" href="#">Globe</li>
-                        <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Leaflet</li>
+                        <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Map</li>
                         <li class="dropdown-item" onclick="handleModeChange('table')" href="#">Table</li>
-                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">javaLib</li>
+                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">Bar Chart</li>
                         <li class="dropdown-item disabled" onclick="handleModeChange('FIXME')"href="">Data</li>
                     </ul>
                 </li>
@@ -120,6 +120,10 @@
                         <li class="filter list-group-item">
                             <label for="wind">Wind Speed (MPH)</label>
                             <select class="form-control" id="windform"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="minwind">Min Wind Speed (MPH)</label>
+                            <select class="form-control" id="minwindform"></select>
                         </li>
                         <li class="filter list-group-item">
                             <label for="ocean">Ocean</label>
