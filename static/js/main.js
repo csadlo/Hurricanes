@@ -257,19 +257,26 @@ function homeMethod(json_data)
     console.log("Exiting homeMethod()...");
 }
 
+var svg;
+const projection = d3.geoOrthographic();
+const path = d3.geoPath().projection(projection);
+var coordinates = [];
+var width = 750, height = 750;
+const center = [width/2, height/2];
+
 function globeMethod(json_data)
 {
     console.log("Entering globeMethod()...");
 
-    var globePath = "..\\static\\images\\globe.jpg";
+//    var globePath = "..\\static\\images\\globe.jpg";
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-    var displayArea = d3.select("#Data_Presentation_Window");
+//    var displayArea = d3.select("#Data_Presentation_Window");
 
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-    displayArea.html("");
+//    displayArea.html("");
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -282,12 +289,88 @@ function globeMethod(json_data)
     summaryArea.insert("h2").text("Global View");
     summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
 
-    displayArea.append("img")
-       .attr("src", globePath)
-       .attr("width", "500")
-       .attr("height", "500");
+//    displayArea.append("img")
+//       .attr("src", globePath)
+//       .attr("width", "500")
+//       .attr("height", "500");
+
+    hurricaneData = json_data;
+
+    //projection = d3.geoOrthographic();
+    //path = d3.geoPath().projection(projection);
+
+    svg = d3.select("#Data_Presentation_Window")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+    
+    d3.json("../static/js/world-110m.json")
+      .then((worldData) => {
+            svg.selectAll(".segment")
+            .data(topojson.feature(worldData, worldData.objects.countries).features)
+            .enter().append("path")
+            .attr("class", "segment")
+            .attr("d", path)
+            .style("stroke", "#888")
+            .style("stroke-width", "1px")
+            .style("fill", (d, i) => 'white')
+            .style("opacity", ".8");          
+      });
+
+    var graticule = d3.geoGraticule().step([10, 10]);
+
+    svg.append("path")
+       .datum(graticule)
+       .attr("class", "graticule")
+       .attr("d", path)
+       .style("fill", "white") 
+       .style("stroke", "blue"); 
+
+    for (var i = 0; i < hurricaneData.length; i++) 
+    {
+       coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude]);
+    }       
+
+    //projection.rotate([90, 0, 0]);
+    rotateGlobe();
+    plotMarkers();
 
     console.log("Exiting globeMethod()..."); 
+}
+
+const config = {
+    speed: 0.005,
+    verticalTilt: -30,
+    horizontalTilt: 0
+}
+
+function rotateGlobe() {
+    d3.timer(function (elapsed) {
+        projection.rotate([config.speed * elapsed - 120, config.verticalTilt, config.horizontalTilt]);
+        svg.selectAll("path").attr("d", path);
+        plotMarkers();
+    });
+}   
+
+function plotMarkers() {
+    var markerGroup = svg.append("g");    
+    var markers = markerGroup.selectAll('circle').data(coordinates);
+    markers
+        .enter()
+        .append('circle')
+        .merge(markers)
+        .attr('cx', d => projection(d)[0])
+        .attr('cy', d => projection(d)[1]) 
+        .attr('fill', d => {
+            const coordinate = [d[0], d[1]];
+            gdistance = d3.geoDistance(coordinate, projection.invert(center)); 
+            return gdistance > 1.57 ? 'none' : '#14db3f'; 
+        })
+        .attr('r', 3); 
+
+    markerGroup.each(function () {
+        this.parentNode.appendChild(this);
+    });
 }
 
 function leafletMethod(json_data)
@@ -698,7 +781,6 @@ function InitializeNameDropDownMenu()
 function InitDashboard()
 {
     console.log("Entering InitDashboard()");
-
     // Check what values are listed in the search window
 
     InitializeYearDropDownMenu();
