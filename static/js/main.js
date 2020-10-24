@@ -23,6 +23,7 @@ var search_button = d3.select("#search-btn");
 search_button.on("click", handleFilterChange);
 
 // Uncomment this if you want the website to refresh when clicking off of a filter form
+//yearInputElement.on("change", handleFilterChange);
 yearInputElement.on("change", handleFilterChange);
 nameInputElement.on("change", handleFilterChange);
 cityInputElement.on("change", handleFilterChange);
@@ -30,6 +31,7 @@ countryInputElement.on("change", handleFilterChange);
 categoryInputElement.on("change", handleFilterChange);
 windInputElement.on("change", handleFilterChange);
 oceanInputElement.on("change", handleFilterChange);
+
 
 
 // Create event handlers 
@@ -253,9 +255,9 @@ function homeMethod(json_data)
 
     //Add the summary
     //summaryArea.insert("h2").text("Home - Welcome to the International Hurricane Database");
-    summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Above list under the dropdown menu you can select the type of data presentation you are interest in.");
-    summaryArea.insert("p").text("Spirits gally coxswain bilge rat black jack salmagundi Brethren of the Coast cutlass hang the jib hornswaggle. Swab Sea Legs mizzen chandler bowsprit fathom bucko lass interloper crack Jennys tea cup. Bilged on her anchor gangplank Plate Fleet fore splice the main brace barque salmagundi draught nipperkin warp.");
-    summaryArea.insert("p").text("Reef Blimey chandler killick nipperkin black jack sloop haul wind swing the lead bring a spring upon her cable. Case shot American Main spirits Jolly Roger crack Jennys tea cup Sink me chantey stern execution dock piracy. Hempen halter mutiny Brethren of the Coast trysail clap of thunder parrel hang the jib draught poop deck Privateer.");
+    summaryArea.insert("p").text("Please use the search bar on the left to select which hurricanes you are interested in. Use the dropdown menu above to change the visualization type.");
+    summaryArea.insert("p").text("This data comes from the HURDAT2, the NOAA's hurricane database, by way of Kaggle.");
+    summaryArea.insert("p").text("Project by Chris Sadlo, Glenda Decapia, Katrice Trahan, and Sarah Kachelmeier");
 
     displayArea.append("img")
        .attr("src", globePath)
@@ -265,19 +267,26 @@ function homeMethod(json_data)
     console.log("Exiting homeMethod()...");
 }
 
+var svg;
+const projection = d3.geoOrthographic();
+const path = d3.geoPath().projection(projection);
+var coordinates = [];
+var width = 750, height = 750;
+const center = [width/2, height/2];
+
 function globeMethod(json_data)
 {
     console.log("Entering globeMethod()...");
 
-    var globePath = "..\\static\\images\\globe.jpg";
+//    var globePath = "..\\static\\images\\globe.jpg";
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-    var displayArea = d3.select("#Data_Presentation_Window");
+//    var displayArea = d3.select("#Data_Presentation_Window");
 
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-    displayArea.html("");
+//    displayArea.html("");
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -290,10 +299,51 @@ function globeMethod(json_data)
     summaryArea.insert("h2").text("Global View");
     summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
 
-    displayArea.append("img")
-       .attr("src", globePath)
-       .attr("width", "500")
-       .attr("height", "500");
+//    displayArea.append("img")
+//       .attr("src", globePath)
+//       .attr("width", "500")
+//       .attr("height", "500");
+
+    hurricaneData = json_data;
+
+    //projection = d3.geoOrthographic();
+    //path = d3.geoPath().projection(projection);
+
+    svg = d3.select("#Data_Presentation_Window")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+    
+    d3.json("../static/js/world-110m.json")
+      .then((worldData) => {
+            svg.selectAll(".segment")
+            .data(topojson.feature(worldData, worldData.objects.countries).features)
+            .enter().append("path")
+            .attr("class", "segment")
+            .attr("d", path)
+            .style("stroke", "#888")
+            .style("stroke-width", "1px")
+            .style("fill", (d, i) => 'white')
+            .style("opacity", ".8");          
+      });
+
+    var graticule = d3.geoGraticule().step([10, 10]);
+
+    svg.append("path")
+       .datum(graticule)
+       .attr("class", "graticule")
+       .attr("d", path)
+       .style("fill", "white") 
+       .style("stroke", "blue"); 
+
+    for (var i = 0; i < hurricaneData.length; i++) 
+    {
+       coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude]);
+    }       
+
+    //projection.rotate([90, 0, 0]);
+    rotateGlobe();
+    plotMarkers();
 
 
     d3.select(window)
@@ -328,6 +378,41 @@ function globeMethod(json_data)
     console.log("Exiting globeMethod()..."); 
 }
 
+const config = {
+    speed: 0.005,
+    verticalTilt: -30,
+    horizontalTilt: 0
+}
+
+function rotateGlobe() {
+    d3.timer(function (elapsed) {
+        projection.rotate([config.speed * elapsed - 120, config.verticalTilt, config.horizontalTilt]);
+        svg.selectAll("path").attr("d", path);
+        plotMarkers();
+    });
+}   
+
+function plotMarkers() {
+    var markerGroup = svg.append("g");    
+    var markers = markerGroup.selectAll('circle').data(coordinates);
+    markers
+        .enter()
+        .append('circle')
+        .merge(markers)
+        .attr('cx', d => projection(d)[0])
+        .attr('cy', d => projection(d)[1]) 
+        .attr('fill', d => {
+            const coordinate = [d[0], d[1]];
+            gdistance = d3.geoDistance(coordinate, projection.invert(center)); 
+            return gdistance > 1.57 ? 'none' : '#14db3f'; 
+        })
+        .attr('r', 3); 
+
+    markerGroup.each(function () {
+        this.parentNode.appendChild(this);
+    });
+}
+
 function leafletMethod(json_data)
 {
     console.log("Entering leafletMethod()...");
@@ -351,26 +436,9 @@ function leafletMethod(json_data)
 
     titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
 
-
     createMap(json_data);
 
     console.log("Exiting leafletMethod()..."); 
-}
-
-function isYearIncluded(yearCriteria, date) {
-    if ("ALL" === yearCriteria) {
-        return true;
-    } else {
-        return date.toString().substr(0, 4) === yearCriteria;
-    }
-}
-
-function isNameIncluded(nameCriteria, name) {
-    if ("ALL" === nameCriteria) {
-        return true;
-    } else {
-        return name.trim().toUpperCase() === nameCriteria;
-    }    
 }
 
 var myMap; // leaflet map
@@ -468,24 +536,17 @@ function javalibMethod(json_data)
     var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
     var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
 
-    var filteredData = [];   
     var filteredNames = [];   
     var filteredDatestamp = [];   
     var filteredWindSpeed = [];   
+
     hurricaneData.forEach((row) =>
     {
-        //if (isYearIncluded(selectedYear, row.date_stamp) 
-        //    && isNameIncluded(selectedName, row.name))
-        {
-            console.log("rowdata ", row);
-            filteredData.push(row);
-            filteredNames.push(row.name);
-            filteredDatestamp.push(row.date_stamp);
-            filteredWindSpeed.push(row.wind);
-
-        }        
+        filteredNames.push(row.name);
+        filteredDatestamp.push(row.date_stamp);
+        filteredWindSpeed.push(row.wind);
     });
-    console.log("javalib filteredData  ", filteredData);
+
     console.log("javalib filteredNames  ", filteredNames);
     console.log("javalib filteredDatestamp  ", filteredDatestamp);
     console.log("javalib filteredWindSpeed  ", filteredWindSpeed);
@@ -534,15 +595,16 @@ function javalibMethod(json_data)
         }, 
         tooltip: 
         {
-            x: 
-            {
-              show: false,
-              formatter: undefined,
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                return "<span><b>Name</b>: " + filteredNames[dataPointIndex] + "<br/>" +
+                            "<b>Max Wind</b>: " +
+                            series[seriesIndex][dataPointIndex] +
+                            "&nbsp;knots</span>"                
             }
         }
 
     }
-      
+
     chart = new ApexCharts(document.querySelector("#Data_Presentation_Window"), options);
     chart.render();
       
@@ -972,7 +1034,6 @@ function InitializeOceanDropDownMenu()
 function InitDashboard()
 {
     console.log("Entering InitDashboard()");
-
     // Check what values are listed in the search window
 
     InitializeYearDropDownMenu();
