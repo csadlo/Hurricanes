@@ -87,7 +87,7 @@ def HurricaneNames():
     return jsonify(all_hurricanes)
 
 
-def build_sql_filter(year, name, city, country, category, wind, ocean):
+def build_sql_filter(year, name, city, country, category, wind, minwind, ocean):
     
     conds = []
 
@@ -124,6 +124,11 @@ def build_sql_filter(year, name, city, country, category, wind, ocean):
         string = [hurricane_table.wind == "{}".format(wind)]
         print(string)
         conds = conds + string
+    
+    if (minwind):
+        string = [hurricane_table.wind >= "{}".format(minwind)]
+        print(string)
+        conds = conds + string
 
     if (ocean):
         string = [hurricane_table.ocean == "{}".format(ocean)]
@@ -143,10 +148,11 @@ def searchFor():
     country = request.args.get('country', None)
     category = request.args.get('category', None)
     wind = request.args.get('wind', None)
+    minwind = request.args.get('minwind', None)
     ocean = request.args.get('ocean', None)
 
     conds = []
-    conds = build_sql_filter(year, name, city, country, category, wind, ocean)
+    conds = build_sql_filter(year, name, city, country, category, wind, minwind, ocean)
     #conds = [ hurricane_table.date_stamp/10000 == '2005', hurricane_table.name == 'KATRINA' ]
     print(conds)
 
@@ -203,10 +209,11 @@ def searchForUnique():
     country = request.args.get('country', None)
     category = request.args.get('category', None)
     wind = request.args.get('wind', None)
+    minwind = request.args.get('minwind', None)
     ocean = request.args.get('ocean', None)
 
     conds = []
-    conds = build_sql_filter(year, name, city, country, category, wind, ocean)
+    conds = build_sql_filter(year, name, city, country, category, wind, minwind, ocean)
     print(conds)
 
     # Open a session, run the query, and then close the session again
@@ -223,6 +230,8 @@ def searchForUnique():
     if (specific == "country"):
         results = session.query(hurricane_table.country).filter(and_(*conds)).all()
     if (specific == "wind"):
+        results = session.query(hurricane_table.wind).filter(and_(*conds)).all()
+    if (specific == "minwind"):
         results = session.query(hurricane_table.wind).filter(and_(*conds)).all()
     if (specific == "category"):
         results = session.query(hurricane_table.category).filter(and_(*conds)).all()
@@ -269,6 +278,8 @@ def searchForUnique():
             dict["country"] = element
         if (specific == "wind"):
             dict["wind"] = element
+        if (specific == "minwind"):
+            dict["minwind"] = element
         if (specific == "category"):
             dict["category"] = element
         if (specific == "ocean"):

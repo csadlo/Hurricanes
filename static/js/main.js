@@ -14,6 +14,7 @@ var cityInputElement = d3.select("#cityform");
 var countryInputElement = d3.select("#countryform");
 var categoryInputElement = d3.select("#categoryform");
 var windInputElement = d3.select("#windform");
+var minwindInputElement = d3.select("#minwindform");
 var oceanInputElement = d3.select("#oceanform");
 
 
@@ -30,6 +31,7 @@ cityInputElement.on("change", handleFilterChange);
 countryInputElement.on("change", handleFilterChange);
 categoryInputElement.on("change", handleFilterChange);
 windInputElement.on("change", handleFilterChange);
+minwindInputElement.on("change", handleFilterChange);
 oceanInputElement.on("change", handleFilterChange);
 
 
@@ -60,8 +62,11 @@ function GetFilterBarInputValues()
     dict["name"]        = nameInputElement.property("value");
     dict["city"]        = cityInputElement.property("value");
     dict["country"]     = countryInputElement.property("value");
-    dict["ccategory"]   = categoryInputElement.property("value");
+    dict["category"]    = categoryInputElement.property("value");
     dict["wind"]        = windInputElement.property("value");
+    dict["minwind"]     = minwindInputElement.property("value");
+    dict["ocean"]       = oceanInputElement.property("value");
+
 
     console.log("Exiting GetFilterBarInputValues()");
 
@@ -84,6 +89,13 @@ function handleFilterChange(event) {
 
     yearform_value = inputs["year"];  // could be "ALL" or could be a specific value
     nameform_value = inputs["name"];  // could be "ALL" or could be a specific value
+    cityform_value = inputs["city"];  // could be "ALL" or could be a specific value
+    countryform_value = inputs["country"];  // could be "ALL" or could be a specific value
+    categoryform_value = inputs["category"];  // could be "ALL" or could be a specific value
+    windform_value = inputs["wind"];  // could be "ALL" or could be a specific value
+    minwindform_value = inputs["minwind"];  // could be "ALL" or could be a specific value
+    oceanform_value = inputs["ocean"];  // could be "ALL" or could be a specific value
+
 
     // Assemble the search URL to match the search bar filters selected
     var search_url = "/searchFor?";
@@ -105,9 +117,70 @@ function handleFilterChange(event) {
             search_url = search_url.concat("&");
 
         search_url = search_url.concat("name=");
-        search_url = search_url.concat(nameform_value.toUpperCase())
+        search_url = search_url.concat(nameform_value.toUpperCase());
         num_params++;
     }
+
+    if (cityform_value && IsSpecificValue(cityform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("city=");
+        search_url = search_url.concat(cityform_value.toUpperCase());
+        num_params++;
+    }
+
+    if (countryform_value && IsSpecificValue(countryform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("country=");
+        search_url = search_url.concat(countryform_value.toUpperCase());
+        num_params++;
+    }
+
+    if (categoryform_value && IsSpecificValue(categoryform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("category=");
+        search_url = search_url.concat(categoryform_value);
+        num_params++;
+    }
+
+    if (windform_value && IsSpecificValue(windform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("wind=");
+        search_url = search_url.concat(windform_value);
+        num_params++;
+    }
+
+    if (minwindform_value && IsSpecificValue(minwindform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("minwind=");
+        search_url = search_url.concat(minwindform_value);
+        num_params++;
+    }
+
+    if (oceanform_value && IsSpecificValue(oceanform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("ocean=");
+        search_url = search_url.concat(oceanform_value.toUpperCase());
+        num_params++;
+    }
+
 
     console.log("Constructing Search URL = ", search_url);
 
@@ -130,9 +203,8 @@ function handleFilterChange(event) {
         UpdateDropDownMenu("country", current_data);
         UpdateDropDownMenu("category", current_data);
         UpdateDropDownMenu("wind", current_data);
+        UpdateDropDownMenu("minwind", current_data);
         UpdateDropDownMenu("ocean", current_data);
-
-
     });
 
     console.log("Exiting handleFilterChange(): Another Happy Landing!");
@@ -185,11 +257,11 @@ function handleModeChange(new_mode)
     else if (current_mode == "globe")
         $('#navbarDropdown').text("Visualization - Globe");
     else if (current_mode == "leaflet")
-        $('#navbarDropdown').text("Visualization - Leaflet");
+        $('#navbarDropdown').text("Visualization - Map");
     else if (current_mode == "table")
         $('#navbarDropdown').text("Visualization - Table");
     else if (current_mode == "javaLib")
-        $('#navbarDropdown').text("Visualization - javaLib");
+        $('#navbarDropdown').text("Visualization - Chart");
     else
         $('#navbarDropdown').text("Visualization - FIXME");
 
@@ -209,6 +281,8 @@ function UpdatePresentationWindow(json_data)
     console.log("Entering UpdatePresentationWindow()");
 
     d3.selectAll("#Data_Presentation_Window > *").remove();
+    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
+    document.getElementById("Data_Presentation_Window").classList.remove('leaflet-container', 'leaflet-retina', 'leaflet-fade-anim', 'leaflet-grab', 'leaflet-touch-drag');
 
     if (chart) {
         chart.destroy();
@@ -221,9 +295,10 @@ function UpdatePresentationWindow(json_data)
     if (mode == "home")
         homeMethod(json_data);
 
-    else if (mode == "globe")
+    else if (mode == "globe") {
+        UpdateGlobeMethod();
         globeMethod(json_data);
-
+    }
     else if (mode == "leaflet")
         leafletMethod(json_data);
 
@@ -249,7 +324,6 @@ function homeMethod(json_data)
     titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
-    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
 
     titleArea.append("p").text("Welcome to the International Hurricane Database");
 
@@ -267,26 +341,31 @@ function homeMethod(json_data)
     console.log("Exiting homeMethod()...");
 }
 
+
+var proj;
+var path;
+var graticule;
 var svg;
-const projection = d3.geoOrthographic();
-const path = d3.geoPath().projection(projection);
+
+
+//const projection = d3.geoOrthographic();
+//const path = d3.geoPath().projection(projection);
 var coordinates = [];
-var width = 750, height = 750;
+var width = 640, height = 640;
 const center = [width/2, height/2];
 
 function globeMethod(json_data)
 {
     console.log("Entering globeMethod()...");
 
-//    var globePath = "..\\static\\images\\globe.jpg";
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
-//    var displayArea = d3.select("#Data_Presentation_Window");
+    //var displayArea = d3.select("#Data_Presentation_Window");
 
     // Reset the title, summary, and display divs to empty
     titleArea.html("");
     summaryArea.html("");
-//    displayArea.html("");
+    //displayArea.html("");
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -299,21 +378,32 @@ function globeMethod(json_data)
     summaryArea.insert("h2").text("Global View");
     summaryArea.insert("p").text("This view of the hurricane data utilizes a projection on an orthoganal projection of the globe.");
 
-//    displayArea.append("img")
-//       .attr("src", globePath)
-//       .attr("width", "500")
-//       .attr("height", "500");
-
     hurricaneData = json_data;
 
     //projection = d3.geoOrthographic();
     //path = d3.geoPath().projection(projection);
 
+    d3.select(window)
+        .on("mousemove", mousemove)
+        .on("mouseup", mouseup);
+
+    proj = d3.geoOrthographic()
+        .scale(300)     // Changes size of the projection
+        .translate([width / 2, height / 2])
+        .clipAngle(90);     // Changes the visible horizon
+
     svg = d3.select("#Data_Presentation_Window")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mousedown", mousedown);
+
+    path = d3.geoPath().projection(proj).pointRadius(1.5);
+
+    graticule = d3.geoGraticule().step([10, 10]);
     
+    proj.rotate([90, -30, 0]);
+
     d3.json("../static/js/world-110m.json")
       .then((worldData) => {
             svg.selectAll(".segment")
@@ -327,8 +417,6 @@ function globeMethod(json_data)
             .style("opacity", ".8");          
       });
 
-    var graticule = d3.geoGraticule().step([10, 10]);
-
     svg.append("path")
        .datum(graticule)
        .attr("class", "graticule")
@@ -338,42 +426,33 @@ function globeMethod(json_data)
 
     for (var i = 0; i < hurricaneData.length; i++) 
     {
-       coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude]);
+       coordinates.push([hurricaneData[i].longitude, hurricaneData[i].latitude, hurricaneData[i].wind]);
     }       
 
-    //projection.rotate([90, 0, 0]);
-    rotateGlobe();
-    plotMarkers();
-
-
-    d3.select(window)
+    /*d3.select(window)
        .on("mousemove", mousemove)
        .on("mouseup", mouseup);
-   
-    var width = 960, height = 500;
-   
+    */
     console.log(d3.geo);
 
-    var proj = d3.geo.orthographic()
-       .scale(220)
-       .translate([width / 2, height / 2])
-       .clipAngle(90);
+    proj.rotate([90, -30, 0]);
+    //rotateGlobe();
+    plotMarkers();
    
    
-    var path = d3.geo.path().projection(proj).pointRadius(1.5);
+    //var graticule = d3.geo.graticule();
    
-    var graticule = d3.geo.graticule();
+    // svg = d3.select("#Data_Display_Window").append("svg")
+    //            .attr("width", width)
+    //            .attr("height", height)
+    //            .on("mousedown", mousedown);
    
-    var svg = d3.select("#Data_Display_Window").append("svg")
-               .attr("width", width)
-               .attr("height", height)
-               .on("mousedown", mousedown);
-   
+    /*
     queue()
-       .defer(d3.json, "world-110m.json")
-       .defer(d3.json, "places.json")
-       .await(ready);
-   
+       .defer(d3.json, "../static/js/world-110m.json")
+       .defer(d3.json, "../static/js/places.json")
+       .await(ready());
+    */
 
     console.log("Exiting globeMethod()..."); 
 }
@@ -386,32 +465,80 @@ const config = {
 
 function rotateGlobe() {
     d3.timer(function (elapsed) {
-        projection.rotate([config.speed * elapsed - 120, config.verticalTilt, config.horizontalTilt]);
+        proj.rotate([config.speed * elapsed + 60, config.verticalTilt, config.horizontalTilt]);
         svg.selectAll("path").attr("d", path);
-        plotMarkers();
+        //plotMarkers();
     });
 }   
 
+function color_scale(wind) {
+
+    if (wind < 35)
+        return '#000080';   // Navy Blue
+    else if (wind < 74)
+        //return '#000080';   // Navy Blue
+        return '#00FF00';   // Lime Green
+    else if (wind <= 95)
+        //return '#00FF00';   // Lime Green
+        return '#FFD700';   // Gold
+    else if (wind <= 110)
+        return '#FF8C00'    // Dark Orange
+    else if (wind <= 129)
+        return '#FF0000';   // Red
+    else if (wind <= 156)
+        return '#FF0000';   // Red
+
+}
+
+                //d3.scaleLinear()
+                //    .domain([0, 130])
+                //    .range('green','red');
+                    //.range(["#23171b","#271a28","#2b1c33","#2f1e3f","#32204a","#362354","#39255f","#3b2768","#3e2a72","#402c7b","#422f83","#44318b","#453493","#46369b","#4839a2","#493ca8","#493eaf","#4a41b5","#4a44bb","#4b46c0","#4b49c5","#4b4cca","#4b4ecf","#4b51d3","#4a54d7","#4a56db","#4959de","#495ce2","#485fe5","#4761e7","#4664ea","#4567ec","#446aee","#446df0","#426ff2","#4172f3","#4075f5","#3f78f6","#3e7af7","#3d7df7","#3c80f8","#3a83f9","#3985f9","#3888f9","#378bf9","#368df9","#3590f8","#3393f8","#3295f7","#3198f7","#309bf6","#2f9df5","#2ea0f4","#2da2f3","#2ca5f1","#2ba7f0","#2aaaef","#2aaced","#29afec","#28b1ea","#28b4e8","#27b6e6","#27b8e5","#26bbe3","#26bde1","#26bfdf","#25c1dc","#25c3da","#25c6d8","#25c8d6","#25cad3","#25ccd1","#25cecf","#26d0cc","#26d2ca","#26d4c8","#27d6c5","#27d8c3","#28d9c0","#29dbbe","#29ddbb","#2adfb8","#2be0b6","#2ce2b3","#2de3b1","#2ee5ae","#30e6ac","#31e8a9","#32e9a6","#34eba4","#35eca1","#37ed9f","#39ef9c","#3af09a","#900c00"]);
+                    //.range(["#23171b","#271a28","#2b1c33","#2f1e3f","#32204a","#362354","#39255f","#3b2768","#3e2a72","#402c7b","#422f83","#44318b","#453493","#46369b","#4839a2","#493ca8","#493eaf","#4a41b5","#4a44bb","#4b46c0","#4b49c5","#4b4cca","#4b4ecf","#4b51d3","#4a54d7","#4a56db","#4959de","#495ce2","#485fe5","#4761e7","#4664ea","#4567ec","#446aee","#446df0","#426ff2","#4172f3","#4075f5","#3f78f6","#3e7af7","#3d7df7","#3c80f8","#3a83f9","#3985f9","#3888f9","#378bf9","#368df9","#3590f8","#3393f8","#3295f7","#3198f7","#309bf6","#2f9df5","#2ea0f4","#2da2f3","#2ca5f1","#2ba7f0","#2aaaef","#2aaced","#29afec","#28b1ea","#28b4e8","#27b6e6","#27b8e5","#26bbe3","#26bde1","#26bfdf","#25c1dc","#25c3da","#25c6d8","#25c8d6","#25cad3","#25ccd1","#25cecf","#26d0cc","#26d2ca","#26d4c8","#27d6c5","#27d8c3","#28d9c0","#29dbbe","#29ddbb","#2adfb8","#2be0b6","#2ce2b3","#2de3b1","#2ee5ae","#30e6ac","#31e8a9","#32e9a6","#34eba4","#35eca1","#37ed9f","#39ef9c","#3af09a","#3cf197","#3ef295","#40f392","#42f490","#44f58d","#46f68b","#48f788","#4af786","#4df884","#4ff981","#51fa7f","#54fa7d","#56fb7a","#59fb78","#5cfc76","#5efc74","#61fd71","#64fd6f","#66fd6d","#69fd6b","#6cfd69","#6ffe67","#72fe65","#75fe63","#78fe61","#7bfe5f","#7efd5d","#81fd5c","#84fd5a","#87fd58","#8afc56","#8dfc55","#90fb53","#93fb51","#96fa50","#99fa4e","#9cf94d","#9ff84b","#a2f84a","#a6f748","#a9f647","#acf546","#aff444","#b2f343","#b5f242","#b8f141","#bbf03f","#beef3e","#c1ed3d","#c3ec3c","#c6eb3b","#c9e93a","#cce839","#cfe738","#d1e537","#d4e336","#d7e235","#d9e034","#dcdf33","#dedd32","#e0db32","#e3d931","#e5d730","#e7d52f","#e9d42f","#ecd22e","#eed02d","#f0ce2c","#f1cb2c","#f3c92b","#f5c72b","#f7c52a","#f8c329","#fac029","#fbbe28","#fdbc28","#feb927","#ffb727","#ffb526","#ffb226","#ffb025","#ffad25","#ffab24","#ffa824","#ffa623","#ffa323","#ffa022","#ff9e22","#ff9b21","#ff9921","#ff9621","#ff9320","#ff9020","#ff8e1f","#ff8b1f","#ff881e","#ff851e","#ff831d","#ff801d","#ff7d1d","#ff7a1c","#ff781c","#ff751b","#ff721b","#ff6f1a","#fd6c1a","#fc6a19","#fa6719","#f96418","#f76118","#f65f18","#f45c17","#f25916","#f05716","#ee5415","#ec5115","#ea4f14","#e84c14","#e64913","#e44713","#e24412","#df4212","#dd3f11","#da3d10","#d83a10","#d5380f","#d3360f","#d0330e","#ce310d","#cb2f0d","#c92d0c","#c62a0b","#c3280b","#c1260a","#be2409","#bb2309","#b92108","#b61f07","#b41d07","#b11b06","#af1a05","#ac1805","#aa1704","#a81604","#a51403","#a31302","#a11202","#9f1101","#9d1000","#9b0f00","#9a0e00","#980e00","#960d00","#950c00","#940c00","#930c00","#920c00","#910b00","#910c00","#900c00","#900c00","#900c00"]);
+
 function plotMarkers() {
-    var markerGroup = svg.append("g");    
+
+    svg.selectAll("g").remove();     // Clean up any old markers
+
+    var markerGroup = svg.append("g");
     var markers = markerGroup.selectAll('circle').data(coordinates);
     markers
         .enter()
         .append('circle')
         .merge(markers)
-        .attr('cx', d => projection(d)[0])
-        .attr('cy', d => projection(d)[1]) 
+        .attr('cx', d => proj(d)[0])
+        .attr('cy', d => proj(d)[1]) 
         .attr('fill', d => {
             const coordinate = [d[0], d[1]];
-            gdistance = d3.geoDistance(coordinate, projection.invert(center)); 
-            return gdistance > 1.57 ? 'none' : '#14db3f'; 
+            gdistance = d3.geoDistance(coordinate, proj.invert(center)); 
+            //return gdistance > 1.57 ? 'none' : '#14db3f'; 
+            return gdistance > 1.57 ? 'none' : color_scale(d[2]);
         })
-        .attr('r', 3); 
+        .attr('r', d => { 
+            return d[2] / 25; 
+        }) 
 
     markerGroup.each(function () {
         this.parentNode.appendChild(this);
     });
+
 }
+
+function UpdateGlobeMethod() {
+
+    // Deletes all the markers
+    d3.select("#Data_Presentation_Window").selectAll("g").html("");
+    d3.select("#Data_Presentation_Window").selectAll("g").remove();
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    console.log("HELLO THERE!!!!");
+    //globe
+
+}
+
 
 function leafletMethod(json_data)
 {
@@ -495,8 +622,8 @@ function createMap(hurricaneData)
         var lat = hurricaneData[i].latitude;
         var lon = hurricaneData[i].longitude;
 
-        console.log("latitude ", lat);
-        console.log("longitude ", lon);
+        //console.log("latitude ", lat);
+        //console.log("longitude ", lon);
 
         var marker = L.marker([lat, lon]);
         marker.bindPopup("Name: " + hurricaneData[i].name +
@@ -573,6 +700,12 @@ function javalibMethod(json_data)
                 }
             }
         },
+        /*
+        stroke: {
+            width: 5,
+            curve: 'straight',
+            //dashArray: [0, 8, 5]
+        },*/
         series: 
         [{
             name: 'Wind (MPH)',
@@ -619,7 +752,7 @@ function UpdateTable(json_data) {
     console.log("UpdateTable(): table data", json_data);
   
     var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
-    var col_order = ["datestamp", "timestamp", "name", "city", "country", "wind", "latitude", "longitude"];
+    var col_order = ["date_stamp", "time_stamp", "name", "city", "country", "wind", "latitude", "longitude"];
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
@@ -634,12 +767,22 @@ function UpdateTable(json_data) {
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
 
+
+    // formatter: function(value, timestamp, opts) 
+    // {
+    //     var dateStr = value.toString();
+    //     return dateStr.toString().substring(4, 6) + "/" 
+    //         + dateStr.toString().substring(6, 8) + "/"
+    //         + dateStr.substring(0, 4);
+    // }
+
+
     var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
     var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
 
     titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
 
-    var table = displayArea.append("table")
+    var table = displayArea.append("table");
     table.attr("class", "table table-striped");
     var thead = table.append("thead");
     var tbody = table.append("tbody");
@@ -781,6 +924,8 @@ function UpdateNameDropDownMenu(json_data)
     }//); 
 }
 
+
+// NOTE: UPDATE THIS FOR FILTER BAR CHANGES
 function UpdateDropDownMenu(type, json_data)
 {
     //d3.json("/yearData").then(function(json_data) 
@@ -805,12 +950,16 @@ function UpdateDropDownMenu(type, json_data)
             selector_string = "Wind Speeds"
             selector = windInputElement 
         }
+        if (type == "minwind") {
+            selector_string = "Wind Speeds"
+            selector = minwindInputElement 
+        }
         if (type == "ocean") {
             selector_string = "Oceans"
             selector = oceanInputElement 
         }
 
-        console.log("UpdateDropDownMenu(",type,"): data ", json_data)
+        //console.log("UpdateDropDownMenu(",type,"): data ", json_data)
 
         // Save the selected value, if any
         var form_value = selector.property("value");
@@ -843,7 +992,11 @@ function UpdateDropDownMenu(type, json_data)
                     uniqueValues.push(record.country);
             }
             if (type == "wind") {
-                if (!uniqueValues.includes(record.wind))
+                if (!uniqueValues.includes(parseInt(record.wind)))
+                    uniqueValues.push(parseInt(record.wind));
+            }
+            if (type == "minwind") {
+                if (!uniqueValues.includes(parseInt(record.wind)))
                     uniqueValues.push(parseInt(record.wind));
             }
             if (type == "category") {
@@ -857,9 +1010,10 @@ function UpdateDropDownMenu(type, json_data)
             }
         });
 
-        // Sort the unique years
+        // Sort all the value type
         uniqueValues.sort();
-        uniqueValues.reverse();
+
+        //uniqueValues.reverse();
 
         console.log("Unique ", selector_string, " are: ", uniqueValues);
 
@@ -1007,6 +1161,28 @@ function InitializeWindSpeedDropDownMenu()
     }); 
 }
 
+function InitializeMinWindSpeedDropDownMenu()
+{
+    d3.json("/searchForUnique?type=wind").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#minwindform");
+        console.log("InitializeMinWindSpeedDropDownMenu: wind data ", data)
+
+        selector.append("option")
+        .text("All Wind Speeds")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.wind)
+          .property("value", record.wind);
+        });
+    }); 
+}
+
 function InitializeOceanDropDownMenu()
 {
     d3.json("/searchForUnique?type=ocean").then(function(data) 
@@ -1042,8 +1218,8 @@ function InitDashboard()
     InitializeCountryDropDownMenu();
     InitializeCategoryDropDownMenu();
     InitializeWindSpeedDropDownMenu();
+    InitializeMinWindSpeedDropDownMenu();
     InitializeOceanDropDownMenu();
-
 
     // Do this to cache the json data into the global current_data variable
     handleFilterChange();

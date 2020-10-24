@@ -25,6 +25,7 @@
     <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/topojson.v0.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-queue.v3.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3-array.v2.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3-geo.v2.min.js"></script>
     <!---------------------->
@@ -75,9 +76,9 @@
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
                         <li class="dropdown-item" onclick="handleModeChange('home')" href="#">Home</li>
                         <li class="dropdown-item" onclick="handleModeChange('globe')" href="#">Globe</li>
-                        <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Leaflet</li>
+                        <li class="dropdown-item" onclick="handleModeChange('leaflet')" href="#">Map</li>
                         <li class="dropdown-item" onclick="handleModeChange('table')" href="#">Table</li>
-                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">javaLib</li>
+                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">Bar Chart</li>
                         <li class="dropdown-item disabled" onclick="handleModeChange('FIXME')"href="">Data</li>
                     </ul>
                 </li>
@@ -121,6 +122,10 @@
                             <select class="form-control" id="windform"></select>
                         </li>
                         <li class="filter list-group-item">
+                            <label for="minwind">Min Wind Speed (MPH)</label>
+                            <select class="form-control" id="minwindform"></select>
+                        </li>
+                        <li class="filter list-group-item">
                             <label for="ocean">Ocean</label>
                             <select class="form-control" id="oceanform"></select>
                         </li>
@@ -134,6 +139,13 @@
 
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2" id="displayTitle">[Display Title]</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group mr-2">
+                          <button type="button" class="btn btn-sm btn-outline-secondary">Download</button>
+                          <button type="button" class="btn btn-sm btn-outline-secondary">Print</button>
+                          &nbsp;
+                        </div>
+                    </div>
                 </div>
 
                 <div id="Data_Presentation_Summary">
