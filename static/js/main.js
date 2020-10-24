@@ -14,6 +14,8 @@ var cityInputElement = d3.select("#cityform");
 var countryInputElement = d3.select("#countryform");
 var categoryInputElement = d3.select("#categoryform");
 var windInputElement = d3.select("#windform");
+var oceanInputElement = d3.select("#oceanform");
+
 
 // Select the button
 var search_button = d3.select("#search-btn");
@@ -28,6 +30,8 @@ cityInputElement.on("change", handleFilterChange);
 countryInputElement.on("change", handleFilterChange);
 categoryInputElement.on("change", handleFilterChange);
 windInputElement.on("change", handleFilterChange);
+oceanInputElement.on("change", handleFilterChange);
+
 
 
 // Create event handlers 
@@ -122,6 +126,12 @@ function handleFilterChange(event) {
         // Dynamically Update all of the OTHER drop down menus, while maintaining an "ALL" option
         UpdateYearDropDownMenu(current_data);
         UpdateNameDropDownMenu(current_data);
+        UpdateDropDownMenu("city", current_data);
+        UpdateDropDownMenu("country", current_data);
+        UpdateDropDownMenu("category", current_data);
+        UpdateDropDownMenu("wind", current_data);
+        UpdateDropDownMenu("ocean", current_data);
+
 
     });
 
@@ -335,6 +345,36 @@ function globeMethod(json_data)
     rotateGlobe();
     plotMarkers();
 
+
+    d3.select(window)
+       .on("mousemove", mousemove)
+       .on("mouseup", mouseup);
+   
+    var width = 960, height = 500;
+   
+    console.log(d3.geo);
+
+    var proj = d3.geo.orthographic()
+       .scale(220)
+       .translate([width / 2, height / 2])
+       .clipAngle(90);
+   
+   
+    var path = d3.geo.path().projection(proj).pointRadius(1.5);
+   
+    var graticule = d3.geo.graticule();
+   
+    var svg = d3.select("#Data_Display_Window").append("svg")
+               .attr("width", width)
+               .attr("height", height)
+               .on("mousedown", mousedown);
+   
+    queue()
+       .defer(d3.json, "world-110m.json")
+       .defer(d3.json, "places.json")
+       .await(ready);
+   
+
     console.log("Exiting globeMethod()..."); 
 }
 
@@ -377,8 +417,7 @@ function leafletMethod(json_data)
 {
     console.log("Entering leafletMethod()...");
 
-    hurricaneData = json_data;
-    console.log("leafletMethod(): data ", hurricaneData);
+    console.log("leafletMethod(): data ", json_data);
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
@@ -389,7 +428,16 @@ function leafletMethod(json_data)
     summaryArea.html("");
     displayArea.html("");
 
+    // Returns a dictionary of the filter bar values
+    inputs = GetFilterBarInputValues();
+
+    var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
+    var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
+
+    titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
+
     createMap(json_data);
+
     console.log("Exiting leafletMethod()..."); 
 }
 
@@ -452,8 +500,12 @@ function createMap(hurricaneData)
 
         var marker = L.marker([lat, lon]);
         marker.bindPopup("Name: " + hurricaneData[i].name +
+                         "<br/>Date: " + hurricaneData[i].date_stamp + 
+                         "<br/>Time: " + hurricaneData[i].time_stamp + 
                          "<br/>Nearest City: " + hurricaneData[i].city + 
                          "<br/>Nearest Country: " + hurricaneData[i].country +
+                         "<br/>Wind Speed (MPH): " + hurricaneData[i].wind +
+                         "<br/>Category: " + hurricaneData[i].category +
                          "<hr/>Coordinates: " + hurricaneData[i].latitude +
                          ", " + hurricaneData[i].longitude
                          );     
@@ -476,6 +528,7 @@ function javalibMethod(json_data)
     d3.selectAll("#Data_Presentation_Window > *").remove();
 
     hurricaneData = json_data;
+    console.log("My filtered data: ", json_data);
 
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
@@ -485,18 +538,18 @@ function javalibMethod(json_data)
 
     var filteredNames = [];   
     var filteredDatestamp = [];   
-    var filteredMaxWind = [];   
+    var filteredWindSpeed = [];   
 
     hurricaneData.forEach((row) =>
     {
         filteredNames.push(row.name);
         filteredDatestamp.push(row.date_stamp);
-        filteredMaxWind.push(row.max_wind);
+        filteredWindSpeed.push(row.wind);
     });
 
     console.log("javalib filteredNames  ", filteredNames);
     console.log("javalib filteredDatestamp  ", filteredDatestamp);
-    console.log("javalib filteredMaxWind  ", filteredMaxWind);
+    console.log("javalib filteredWindSpeed  ", filteredWindSpeed);
     
     d3.selectAll("#displayTitle > *").remove();
     d3.select("#displayTitle").append("p").text("Hurricane " + selectedName + ", Year " + selectedYear);
@@ -522,8 +575,8 @@ function javalibMethod(json_data)
         },
         series: 
         [{
-            name: 'Max Wind',
-            data: filteredMaxWind
+            name: 'Wind (MPH)',
+            data: filteredWindSpeed
         }],
         xaxis: 
         {
@@ -566,7 +619,7 @@ function UpdateTable(json_data) {
     console.log("UpdateTable(): table data", json_data);
   
     var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
-    var col_order = ["datestamp", "timestamp", "name", "city", "country", "max_wind", "latitude", "longitude"];
+    var col_order = ["datestamp", "timestamp", "name", "city", "country", "wind", "latitude", "longitude"];
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
@@ -728,13 +781,103 @@ function UpdateNameDropDownMenu(json_data)
     }//); 
 }
 
+function UpdateDropDownMenu(type, json_data)
+{
+    //d3.json("/yearData").then(function(json_data) 
+    {
+        // selects the dropdown entity in the html
+        var selector
+        var selector_string
+
+        if (type == "city") {
+            selector_string = "Cities"
+            selector = cityInputElement 
+        }
+        if (type == "country") {
+            selector_string = "Countries"
+            selector = countryInputElement 
+        }
+        if (type == "category") {
+            selector_string = "Categories"
+            selector = categoryInputElement 
+        }
+        if (type == "wind") {
+            selector_string = "Wind Speeds"
+            selector = windInputElement 
+        }
+        if (type == "ocean") {
+            selector_string = "Oceans"
+            selector = oceanInputElement 
+        }
+
+        console.log("UpdateDropDownMenu(",type,"): data ", json_data)
+
+        // Save the selected value, if any
+        var form_value = selector.property("value");
+
+        selector.selectAll("option").remove();
+
+        // Put the selected value at the top of the list
+        if (form_value && IsSpecificValue(form_value)) {
+            selector.append("option")
+            .text(form_value)
+            .property("value", form_value);
+        }
+
+        var combostring = "All " + selector_string
+        selector.append("option")
+        .text(combostring)
+        .property("value", "ALL");
+
+        // filter out non-unique years
+        var uniqueValues = []
+
+        json_data.forEach((record) =>
+        {
+            if (type == "city") {
+                if (!uniqueValues.includes(record.city))
+                    uniqueValues.push(record.city);
+            }
+            if (type == "country") {
+                if (!uniqueValues.includes(record.country))
+                    uniqueValues.push(record.country);
+            }
+            if (type == "wind") {
+                if (!uniqueValues.includes(record.wind))
+                    uniqueValues.push(parseInt(record.wind));
+            }
+            if (type == "category") {
+                //var year = Math.floor(record.date_stamp/10000);
+                if (!uniqueValues.includes(record.category))
+                    uniqueValues.push(record.category);
+            }
+            if (type == "ocean") {
+                if (!uniqueValues.includes(record.ocean))
+                    uniqueValues.push(record.ocean);
+            }
+        });
+
+        // Sort the unique years
+        uniqueValues.sort();
+        uniqueValues.reverse();
+
+        console.log("Unique ", selector_string, " are: ", uniqueValues);
+
+        // fills the dropdown with list of values for selection
+        uniqueValues.forEach((element) =>
+        {
+            selector.append("option")
+            .text(element)
+            .property("value", element);
+        });
+    }//);
+}
+
 
 
 function InitializeYearDropDownMenu()
 {
-    console.log("Testing 1 2 3");
-
-    d3.json("/yearData").then(function(data) 
+    d3.json("/searchForUnique?type=year").then(function(data) 
     {
         // selects the dropdown entity in the html
         var selector = d3.select("#yearform");
@@ -776,6 +919,116 @@ function InitializeNameDropDownMenu()
     }); 
 }
 
+function InitializeCityDropDownMenu()
+{
+    d3.json("/searchForUnique?type=city").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#cityform");
+        console.log("InitializeCityDropDownMenu: city data ", data)
+
+        selector.append("option")
+        .text("All Cities")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.city)
+          .property("value", record.city);
+        });
+    });
+}
+
+function InitializeCountryDropDownMenu()
+{
+    d3.json("/searchForUnique?type=country").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#countryform");
+        console.log("InitializeCountryDropDownMenu: country data ", data)
+
+        selector.append("option")
+        .text("All Countries")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.country)
+          .property("value", record.country);
+        });
+    });
+}
+
+function InitializeCategoryDropDownMenu()
+{
+    d3.json("/searchForUnique?type=category").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#categoryform");
+        console.log("InitializeCategoryDropDownMenu: category data ", data)
+
+        selector.append("option")
+        .text("All Categories")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.category)
+          .property("value", record.category);
+        });
+    }); 
+}
+
+function InitializeWindSpeedDropDownMenu()
+{
+    d3.json("/searchForUnique?type=wind").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#windform");
+        console.log("InitializeWindSpeedDropDownMenu: wind data ", data)
+
+        selector.append("option")
+        .text("All Wind Speeds")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.wind)
+          .property("value", record.wind);
+        });
+    }); 
+}
+
+function InitializeOceanDropDownMenu()
+{
+    d3.json("/searchForUnique?type=ocean").then(function(data) 
+    {
+        // selects the dropdown entity in the html
+        var selector = d3.select("#oceanform");
+        console.log("InitializeOceanDropDownMenu: ocean data ", data)
+
+        selector.append("option")
+        .text("All Oceans")
+        .property("value", "ALL");
+
+        // fills the dropdown with list of values for selection
+        data.forEach((record) =>
+        {
+          selector.append("option")
+          .text(record.ocean)
+          .property("value", record.ocean);
+        });
+    }); 
+}
+
 // NOTE: UPDATE THIS FOR FILTER BAR CHANGES
 // This function displays the dashboard in the landing page by using the first ID in dropdown as default
 function InitDashboard()
@@ -785,6 +1038,12 @@ function InitDashboard()
 
     InitializeYearDropDownMenu();
     InitializeNameDropDownMenu();
+    InitializeCityDropDownMenu();
+    InitializeCountryDropDownMenu();
+    InitializeCategoryDropDownMenu();
+    InitializeWindSpeedDropDownMenu();
+    InitializeOceanDropDownMenu();
+
 
     // Do this to cache the json data into the global current_data variable
     handleFilterChange();
