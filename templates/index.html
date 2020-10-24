@@ -12,7 +12,21 @@
 
     <!-- Import the D3 library. Note that this has to happen 
     before we import any code that uses D3. -->
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <!-- <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/queue.v1.min.js"></script>
+    <script src="https://d3js.org/topojson.v0.min.js"></script> -->
+
+    <!-- D3 JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/topojson.v0.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-array.v2.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-geo.v2.min.js"></script>
+    <!---------------------->
+
+    <script src="http://www.webglearth.com/v2/api.js"></script>
+
 
     <!-- Import some CSS, just to show how it's done. -->
     <!--  <link rel="stylesheet" type="text/css" href="static/css/style.css"></link> -->
@@ -115,8 +129,12 @@
                             <select class="form-control" id="categoryform"></select>
                         </li>
                         <li class="filter list-group-item">
-                            <label for="wind">Maximum Wind Speed</label>
+                            <label for="wind">Wind Speed (MPH)</label>
                             <select class="form-control" id="windform"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="ocean">Ocean</label>
+                            <select class="form-control" id="oceanform"></select>
                         </li>
                     </ul>
                 </div>
@@ -158,8 +176,10 @@
     <a href="/maptest">Click here for the maptest page!</a>
 
     <!-- D3 JavaScript -->
-    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script> -->
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/topojson.v0.min.js"></script> -->
     <!---------------------->
 
     <!-- API key -->
@@ -169,13 +189,14 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
     <!-- ADDED for LEAFLET-->
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
-    
 
     <!-- Import the main JavaScript code. -->    
     <script type="text/javascript" src="static/js/testdata.js"></script>
+    <script type="text/javascript" src="static/js/globeScripts.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
 </body>

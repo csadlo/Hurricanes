@@ -67,4 +67,12 @@
 * Open and execute hurricane.ipynb file
 
 # Step 7
-## Profit?
+
+* Return to the pgAdmin tab in your browser
+* Databases -> hurricanes -> schemas -> public -> Table -> hurricanes
+* Now either right-click on hurricanes 
+    -or-
+* Highlight hurricanes and select "Object" in the top tool bar and then click "Properties"
+* A window will pop-up. Select the "Columns" tab.
+* From there, while looking at the "index" row, toggle the "Not NULL?" and "Primary Key?" options to "yes"
+* SAVE

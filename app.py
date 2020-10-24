@@ -16,6 +16,8 @@ from config import password
 
 from datetime import datetime
 
+import math
+
 
 # Define the database connection parameters
 database_name = 'hurricanes' # Created in Week 9, Night 1, Exercise 08-Stu_CRUD 
@@ -85,94 +87,14 @@ def HurricaneNames():
     return jsonify(all_hurricanes)
 
 
-@app.route("/everything")
-def everything():
-    ''' Query the database for population numbers and return the results as a JSON. '''
-
-    # Open a session, run the query, and then close the session again
-    session = Session(engine)
-    results = session.query(hurricane_table.name,
-                            hurricane_table.date_stamp,
-                            hurricane_table.time_stamp,
-                            hurricane_table.status,
-                            hurricane_table.max_wind,
-                            hurricane_table.city,
-                            hurricane_table.country,
-                            hurricane_table.new_latitude,
-                            hurricane_table.new_longitude).all()
-    session.close 
-
-    print("results: ", results)
-
-    hurricaneDetails = []
-    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
-        dict = {}
-        dict["name"] = name
-        dict["status"] = status
-        dict["date_stamp"] = date_stamp
-        dict["time_stamp"] = time_stamp
-        dict["max_wind"] = max_wind
-        dict["city"] = city
-        dict["country"] = country
-        dict["latitude"] = new_latitude
-        dict["longitude"] = new_longitude
-        hurricaneDetails.append(dict)
-
-    # Return the jsonified result. 
-    return jsonify(hurricaneDetails)
-
-
-
-@app.route("/searchByName")
-def searchByName():
-    ''' Query the database for population numbers and return the results as a JSON. '''
-
-    name  = request.args.get('name', None)
-
-    # Open a session, run the query, and then close the session again
-    session = Session(engine)
-    results = session.query(hurricane_table.name,
-                            hurricane_table.date_stamp,
-                            hurricane_table.time_stamp,
-                            hurricane_table.status,
-                            hurricane_table.max_wind,
-                            hurricane_table.city,
-                            hurricane_table.country,
-                            hurricane_table.new_latitude,
-                            hurricane_table.new_longitude)\
-                                .filter(hurricane_table.name == name).all()
-    session.close 
-
-    print("Search Results: ", results)
-
-    hurricaneDetails = []
-    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
-        dict = {}
-        dict["name"] = name
-        dict["status"] = status
-        dict["date_stamp"] = date_stamp
-        dict["time_stamp"] = time_stamp
-        dict["max_wind"] = max_wind
-        dict["city"] = city
-        dict["country"] = country
-        dict["latitude"] = new_latitude
-        dict["longitude"] = new_longitude
-        hurricaneDetails.append(dict)
-
-    # Return the jsonified result. 
-    return jsonify(hurricaneDetails)
-
-
-
-@app.route("/searchFor")
-def searchFor():
-    ''' Query the database for population numbers and return the results as a JSON. '''
-
-    year  = request.args.get('year', None)
-    name  = request.args.get('name', None)
-
-    conds = []
+def build_sql_filter(year, name, city, country, category, wind, ocean):
     
+    conds = []
+
+    ### Comment this to use the full database
+    string = [hurricane_table.date_stamp/10000 >= "{}".format(1950)]
+    conds = conds + string
+
     if (year):
         string = [hurricane_table.date_stamp/10000 == "{}".format(year)]
         print(string)
@@ -183,6 +105,48 @@ def searchFor():
         print(string)
         conds = conds + string
 
+    if (city):
+        string = [hurricane_table.city == "{}".format(city)]
+        print(string)
+        conds = conds + string
+
+    if (country):
+        string = [hurricane_table.country == "{}".format(country)]
+        print(string)
+        conds = conds + string
+
+    if (category):
+        string = [hurricane_table.category == "{}".format(category)]
+        print(string)
+        conds = conds + string
+
+    if (wind):
+        string = [hurricane_table.wind == "{}".format(wind)]
+        print(string)
+        conds = conds + string
+
+    if (ocean):
+        string = [hurricane_table.ocean == "{}".format(ocean)]
+        print(string)
+        conds = conds + string
+
+    return conds
+
+
+@app.route("/searchFor")
+def searchFor():
+    ''' Query the database for population numbers and return the results as a JSON. '''
+
+    year  = request.args.get('year', None)
+    name  = request.args.get('name', None)
+    city = request.args.get('city', None)
+    country = request.args.get('country', None)
+    category = request.args.get('category', None)
+    wind = request.args.get('wind', None)
+    ocean = request.args.get('ocean', None)
+
+    conds = []
+    conds = build_sql_filter(year, name, city, country, category, wind, ocean)
     #conds = [ hurricane_table.date_stamp/10000 == '2005', hurricane_table.name == 'KATRINA' ]
     print(conds)
 
@@ -192,11 +156,13 @@ def searchFor():
                             hurricane_table.date_stamp,
                             hurricane_table.time_stamp,
                             hurricane_table.status,
-                            hurricane_table.max_wind,
+                            hurricane_table.wind,
                             hurricane_table.city,
                             hurricane_table.country,
                             hurricane_table.new_latitude,
-                            hurricane_table.new_longitude)\
+                            hurricane_table.new_longitude,
+                            hurricane_table.category,
+                            hurricane_table.ocean)\
                                 .filter(and_(*conds)).all()                                
                                
     session.close 
@@ -204,54 +170,115 @@ def searchFor():
     print("Search Results: ", results)
 
     hurricaneDetails = []
-    for name, date_stamp, time_stamp, status, max_wind, city, country, new_latitude, new_longitude in results:
+    for name, date_stamp, time_stamp, status, wind, city, country, new_latitude, new_longitude, category, ocean in results:
         dict = {}
         dict["name"] = name
         dict["status"] = status
         dict["date_stamp"] = date_stamp
         dict["time_stamp"] = time_stamp
-        dict["max_wind"] = max_wind
+        dict["wind"] = wind
         dict["city"] = city
         dict["country"] = country
         dict["latitude"] = new_latitude
         dict["longitude"] = new_longitude
+        dict["category"] = category
+        dict["ocean"] = ocean
         hurricaneDetails.append(dict)
 
     # Return the jsonified result. 
     return jsonify(hurricaneDetails)
 
 
+@app.route("/searchForUnique")
+def searchForUnique():
+    ''' Query the database for population numbers and return the results as a JSON. '''
 
-@app.route("/test")
-def TestRoute():
-    ''' This function returns a simple message, just to guarantee that
-        the Flask server is working. '''
+    ### REQUIRED ###
+    specific  = request.args.get('type', None)  
 
-    return "This is the test route!"
+    ### OPTIONAL ###
+    year  = request.args.get('year', None)
+    name  = request.args.get('name', None)
+    city = request.args.get('city', None)
+    country = request.args.get('country', None)
+    category = request.args.get('category', None)
+    wind = request.args.get('wind', None)
+    ocean = request.args.get('ocean', None)
 
-@app.route("/dictionary")
-def DictionaryRoute():
-    ''' This function returns a jsonified dictionary. Ideally we'd create 
-        that dictionary from a database query. '''
+    conds = []
+    conds = build_sql_filter(year, name, city, country, category, wind, ocean)
+    print(conds)
 
-    dict = { "Fine Sipping Tequila": 10,
-             "Beer": 2,
-             "Red Wine": 8,
-             "White Wine": 0.25}
-    
-    return jsonify(dict) # Return the jsonified version of the dictionary
+    # Open a session, run the query, and then close the session again
+    session = Session(engine)
 
-@app.route("/dict")
-def DictRoute():
-    ''' This seems to work in the latest versions of Chrome. But it's WRONG to
-        return a dictionary (or any Python-specific datatype) without jsonifying
-        it first! '''        
+    if (specific == "year"):
+        results = session.query(hurricane_table.date_stamp).filter(and_(*conds)).all()
+    if (specific == "date"):
+        results = session.query(hurricane_table.date_stamp).filter(and_(*conds)).all()
+    if (specific == "name"):
+        results = session.query(hurricane_table.name).filter(and_(*conds)).all()
+    if (specific == "city"):
+        results = session.query(hurricane_table.city).filter(and_(*conds)).all()
+    if (specific == "country"):
+        results = session.query(hurricane_table.country).filter(and_(*conds)).all()
+    if (specific == "wind"):
+        results = session.query(hurricane_table.wind).filter(and_(*conds)).all()
+    if (specific == "category"):
+        results = session.query(hurricane_table.category).filter(and_(*conds)).all()
+    if (specific == "ocean"):
+        results = session.query(hurricane_table.ocean).filter(and_(*conds)).all()
 
-    dict = { "one": 1,
-             "two": 2,
-             "three": 3}
-    
-    return dict # WRONG! Don't return a dictionary! Return a JSON instead. 
+    session.close          
+
+    List = []
+
+    if (specific == "year"):
+        for row in results:
+            yearNum = math.floor(row[0] / 10000)
+            if (yearNum not in List):
+                List.append(yearNum)
+    else:
+        for row in results:
+            if (row[0] not in List):
+                List.append(row[0])
+
+    #print("Search Results: ", results)
+    #print("Search List: ", List)
+
+    List.sort()
+
+    if (specific == "year"):
+        List.sort(reverse=True)
+
+
+    outboundJson = []
+
+    for element in List:
+
+        dict = {}
+        if (specific == "year"):
+            dict["year"] = element
+        if (specific == "date"):
+            dict["date_stamp"] = element
+        if (specific == "name"):
+            dict["name"] = element
+        if (specific == "city"):
+            dict["city"] = element
+        if (specific == "country"):
+            dict["country"] = element
+        if (specific == "wind"):
+            dict["wind"] = element
+        if (specific == "category"):
+            dict["category"] = element
+        if (specific == "ocean"):
+            dict["ocean"] = element
+
+        outboundJson.append(dict)
+
+    # Return the jsonified result. 
+    return jsonify(outboundJson)
+
 
 @app.route("/yearData")
 def YearData():

@@ -8,11 +8,13 @@ CREATE TABLE hurricanes (
 	status TEXT,
 	latitude FLOAT,
 	longitude FLOAT,
-	max_wind INT,
+	wind INT,
 	min_pressure INT,
 	new_latitude FLOAT,
 	new_longitude FLOAT,
 	city TEXT,
-	country TEXT
+	country TEXT,
+    ocean TEXT,
+    category INT
 );
 
