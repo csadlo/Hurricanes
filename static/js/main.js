@@ -60,8 +60,10 @@ function GetFilterBarInputValues()
     dict["name"]        = nameInputElement.property("value");
     dict["city"]        = cityInputElement.property("value");
     dict["country"]     = countryInputElement.property("value");
-    dict["ccategory"]   = categoryInputElement.property("value");
+    dict["category"]    = categoryInputElement.property("value");
     dict["wind"]        = windInputElement.property("value");
+    dict["ocean"]       = oceanInputElement.property("value");
+
 
     console.log("Exiting GetFilterBarInputValues()");
 
@@ -84,6 +86,12 @@ function handleFilterChange(event) {
 
     yearform_value = inputs["year"];  // could be "ALL" or could be a specific value
     nameform_value = inputs["name"];  // could be "ALL" or could be a specific value
+    cityform_value = inputs["city"];  // could be "ALL" or could be a specific value
+    countryform_value = inputs["country"];  // could be "ALL" or could be a specific value
+    categoryform_value = inputs["category"];  // could be "ALL" or could be a specific value
+    windform_value = inputs["wind"];  // could be "ALL" or could be a specific value
+    oceanform_value = inputs["ocean"];  // could be "ALL" or could be a specific value
+
 
     // Assemble the search URL to match the search bar filters selected
     var search_url = "/searchFor?";
@@ -105,9 +113,60 @@ function handleFilterChange(event) {
             search_url = search_url.concat("&");
 
         search_url = search_url.concat("name=");
-        search_url = search_url.concat(nameform_value.toUpperCase())
+        search_url = search_url.concat(nameform_value.toUpperCase());
         num_params++;
     }
+
+    if (cityform_value && IsSpecificValue(cityform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("city=");
+        search_url = search_url.concat(cityform_value.toUpperCase());
+        num_params++;
+    }
+
+    if (countryform_value && IsSpecificValue(countryform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("country=");
+        search_url = search_url.concat(countryform_value.toUpperCase());
+        num_params++;
+    }
+
+    if (categoryform_value && IsSpecificValue(categoryform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("category=");
+        search_url = search_url.concat(categoryform_value);
+        num_params++;
+    }
+
+    if (windform_value && IsSpecificValue(windform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("wind=");
+        search_url = search_url.concat(windform_value);
+        num_params++;
+    }
+
+    if (oceanform_value && IsSpecificValue(oceanform_value)) 
+    {
+        if (num_params > 0)    // Means we're dealing with multiple parameters
+            search_url = search_url.concat("&");
+
+        search_url = search_url.concat("ocean=");
+        search_url = search_url.concat(oceanform_value.toUpperCase());
+        num_params++;
+    }
+
 
     console.log("Constructing Search URL = ", search_url);
 
@@ -131,8 +190,6 @@ function handleFilterChange(event) {
         UpdateDropDownMenu("category", current_data);
         UpdateDropDownMenu("wind", current_data);
         UpdateDropDownMenu("ocean", current_data);
-
-
     });
 
     console.log("Exiting handleFilterChange(): Another Happy Landing!");
@@ -185,11 +242,11 @@ function handleModeChange(new_mode)
     else if (current_mode == "globe")
         $('#navbarDropdown').text("Visualization - Globe");
     else if (current_mode == "leaflet")
-        $('#navbarDropdown').text("Visualization - Leaflet");
+        $('#navbarDropdown').text("Visualization - Map");
     else if (current_mode == "table")
         $('#navbarDropdown').text("Visualization - Table");
     else if (current_mode == "javaLib")
-        $('#navbarDropdown').text("Visualization - javaLib");
+        $('#navbarDropdown').text("Visualization - Chart");
     else
         $('#navbarDropdown').text("Visualization - FIXME");
 
@@ -209,6 +266,8 @@ function UpdatePresentationWindow(json_data)
     console.log("Entering UpdatePresentationWindow()");
 
     d3.selectAll("#Data_Presentation_Window > *").remove();
+    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
+    document.getElementById("Data_Presentation_Window").classList.remove('leaflet-container', 'leaflet-retina', 'leaflet-fade-anim', 'leaflet-grab', 'leaflet-touch-drag');
 
     if (chart) {
         chart.destroy();
@@ -249,7 +308,6 @@ function homeMethod(json_data)
     titleArea.html("");
     summaryArea.html("");
     displayArea.html("");
-    //document.getElementById("Data_Presentation_Window").innerHTML = "";    
 
     titleArea.append("p").text("Welcome to the International Hurricane Database");
 
@@ -271,7 +329,7 @@ var svg;
 const projection = d3.geoOrthographic();
 const path = d3.geoPath().projection(projection);
 var coordinates = [];
-var width = 750, height = 750;
+var width = 1000, height = 1000;
 const center = [width/2, height/2];
 
 function globeMethod(json_data)
@@ -312,7 +370,8 @@ function globeMethod(json_data)
     svg = d3.select("#Data_Presentation_Window")
                 .append("svg")
                 .attr("width", width)
-                .attr("height", height);
+                .attr("height", height)
+                .on("mousedown", mousedown);
     
     d3.json("../static/js/world-110m.json")
       .then((worldData) => {
@@ -345,16 +404,13 @@ function globeMethod(json_data)
     rotateGlobe();
     plotMarkers();
 
-
     d3.select(window)
        .on("mousemove", mousemove)
        .on("mouseup", mouseup);
    
-    var width = 960, height = 500;
-   
     console.log(d3.geo);
 
-    var proj = d3.geo.orthographic()
+    var proj = d3.geoOrthographic()
        .scale(220)
        .translate([width / 2, height / 2])
        .clipAngle(90);
@@ -362,12 +418,12 @@ function globeMethod(json_data)
    
     var path = d3.geo.path().projection(proj).pointRadius(1.5);
    
-    var graticule = d3.geo.graticule();
+    //var graticule = d3.geo.graticule();
    
-    var svg = d3.select("#Data_Display_Window").append("svg")
-               .attr("width", width)
-               .attr("height", height)
-               .on("mousedown", mousedown);
+    // svg = d3.select("#Data_Display_Window").append("svg")
+    //            .attr("width", width)
+    //            .attr("height", height)
+    //            .on("mousedown", mousedown);
    
     queue()
        .defer(d3.json, "world-110m.json")
@@ -495,8 +551,8 @@ function createMap(hurricaneData)
         var lat = hurricaneData[i].latitude;
         var lon = hurricaneData[i].longitude;
 
-        console.log("latitude ", lat);
-        console.log("longitude ", lon);
+        //console.log("latitude ", lat);
+        //console.log("longitude ", lon);
 
         var marker = L.marker([lat, lon]);
         marker.bindPopup("Name: " + hurricaneData[i].name +
@@ -619,7 +675,7 @@ function UpdateTable(json_data) {
     console.log("UpdateTable(): table data", json_data);
   
     var col_names = ["Year", "Time", "Name", "City", "Country", "Wind Speed", "Latitude", "Longitude"];
-    var col_order = ["datestamp", "timestamp", "name", "city", "country", "wind", "latitude", "longitude"];
+    var col_order = ["date_stamp", "time_stamp", "name", "city", "country", "wind", "latitude", "longitude"];
 
     var titleArea = d3.select("#displayTitle");
     var summaryArea = d3.select("#Data_Presentation_Summary");
@@ -634,12 +690,22 @@ function UpdateTable(json_data) {
     // Returns a dictionary of the filter bar values
     inputs = GetFilterBarInputValues();
 
+
+    // formatter: function(value, timestamp, opts) 
+    // {
+    //     var dateStr = value.toString();
+    //     return dateStr.toString().substring(4, 6) + "/" 
+    //         + dateStr.toString().substring(6, 8) + "/"
+    //         + dateStr.substring(0, 4);
+    // }
+
+
     var selectedYear = inputs["year"];  // could be "ALL" or could be a specific value
     var selectedName = inputs["name"];  // could be "ALL" or could be a specific value
 
     titleArea.append("p").text("Hurricane " + selectedName + " , " + "Year " + selectedYear);
 
-    var table = displayArea.append("table")
+    var table = displayArea.append("table");
     table.attr("class", "table table-striped");
     var thead = table.append("thead");
     var tbody = table.append("tbody");
@@ -781,6 +847,8 @@ function UpdateNameDropDownMenu(json_data)
     }//); 
 }
 
+
+// NOTE: UPDATE THIS FOR FILTER BAR CHANGES
 function UpdateDropDownMenu(type, json_data)
 {
     //d3.json("/yearData").then(function(json_data) 
@@ -810,7 +878,7 @@ function UpdateDropDownMenu(type, json_data)
             selector = oceanInputElement 
         }
 
-        console.log("UpdateDropDownMenu(",type,"): data ", json_data)
+        //console.log("UpdateDropDownMenu(",type,"): data ", json_data)
 
         // Save the selected value, if any
         var form_value = selector.property("value");
@@ -843,7 +911,7 @@ function UpdateDropDownMenu(type, json_data)
                     uniqueValues.push(record.country);
             }
             if (type == "wind") {
-                if (!uniqueValues.includes(record.wind))
+                if (!uniqueValues.includes(parseInt(record.wind)))
                     uniqueValues.push(parseInt(record.wind));
             }
             if (type == "category") {
@@ -857,9 +925,10 @@ function UpdateDropDownMenu(type, json_data)
             }
         });
 
-        // Sort the unique years
+        // Sort all the value type
         uniqueValues.sort();
-        uniqueValues.reverse();
+
+        //uniqueValues.reverse();
 
         console.log("Unique ", selector_string, " are: ", uniqueValues);
 
@@ -1043,7 +1112,6 @@ function InitDashboard()
     InitializeCategoryDropDownMenu();
     InitializeWindSpeedDropDownMenu();
     InitializeOceanDropDownMenu();
-
 
     // Do this to cache the json data into the global current_data variable
     handleFilterChange();
