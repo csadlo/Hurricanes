@@ -1,9 +1,13 @@
 International Hurricane Database
 
 Project 2 by Christopher Sadlo, Glenda Decapia, Katrice Trahan, and Sarah Kachelmeier 
+Copywrite October, 2020
 
+# Overview
 ​
-This project displays and visualizes hurricane data from 2000 to 2015 in both the Atlantic and Pacific oceans. On our website, you can see this data visualized in an Apex chart, a leaflet map, and D3 globe, as well as a table, and filter the data by hurricane year, name, and more. 
+This project displays and visualizes hurricane data from 1851 to 2015 in both the Atlantic and Pacific oceans. On our website, you can see this data visualized in an Apex chart, a leaflet map, and D3 globe, as well as a table. Use the filter bar located on the left-hand side of the screen to filter the data by hurricane year, name, category, and more! 
+
+We chose to do a project on hurricanes because multiple team members have been affected by hurricanes during our lives.
 
 
 This data comes from HURDAT2, the NOAA's hurricane database, via Kaggle.
