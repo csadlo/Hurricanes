@@ -92,8 +92,8 @@ def build_sql_filter(year, name, city, country, category, wind, minwind, ocean):
     conds = []
 
     ### Comment this to use the full database
-    string = [hurricane_table.date_stamp/10000 >= "{}".format(1950)]
-    conds = conds + string
+    #string = [hurricane_table.date_stamp/10000 >= "{}".format(1950)]
+    #conds = conds + string
 
     if (year):
         string = [hurricane_table.date_stamp/10000 == "{}".format(year)]

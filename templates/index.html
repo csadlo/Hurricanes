@@ -193,6 +193,36 @@
     <script type="text/javascript" src="static/js/globeScripts.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
+    <br>
+    <br>
+
+    <!-- <img id="temp" src="../static/images/dom_gandalf_composite2.jpg"> -->
+
+    <img id="dom_image" style="display: none" src="../static/images/dom_gandalf_composite2.jpg">
+
+    <div class="form-group col-lg-3">
+        <label for="InputPassword"></label>
+        <input type="password" class="form-control" style="display: block;" onchange="equals()" id="InputPassword1" placeholder="Speak Friend and Enter.">
+    </div>
+
+    <script type="text/javascript">
+        var firstField = document.getElementById('InputPassword1');
+        var image =    document.getElementById('dom_image');
+    
+        function equals() {
+            console.log("Password is ", firstField.value);
+            if(firstField.value == "Mellon" || firstField.value == "mellon") {
+                image.style.display = 'block';
+                //image2.style.display = 'none';
+            }
+            else {
+                image.style.display = 'none';
+                //image2.style.display = 'block';
+            }
+        }
+        firstField.onkeyup = equals;
+    </script>
+
 </body>
 
 </html>
