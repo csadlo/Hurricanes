@@ -127,7 +127,7 @@ function handleFilterChange(event) {
             search_url = search_url.concat("&");
 
         search_url = search_url.concat("city=");
-        search_url = search_url.concat(cityform_value.toUpperCase());
+        search_url = search_url.concat(cityform_value);
         num_params++;
     }
 
@@ -137,7 +137,7 @@ function handleFilterChange(event) {
             search_url = search_url.concat("&");
 
         search_url = search_url.concat("country=");
-        search_url = search_url.concat(countryform_value.toUpperCase());
+        search_url = search_url.concat(countryform_value);
         num_params++;
     }
 
